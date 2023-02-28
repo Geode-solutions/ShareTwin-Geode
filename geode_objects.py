@@ -18,7 +18,7 @@ def objects_list():
             "output": [ og.SectionOutputFactory, og_gs.CrossSectionOutputFactory ],
             "load": og_gs.load_cross_section,
             "save": og_gs.save_cross_section,
-            "save_viewable": ""
+            "save_viewable": g_vo.save_viewable_cross_section
         },
         "EdgedCurve2D": {
             "input": [ og.EdgedCurveInputFactory2D ],
@@ -67,14 +67,14 @@ def objects_list():
             "output": [ og.PolygonalSurfaceOutputFactory2D ], 
             "load": og.load_polygonal_surface2D, 
             "save": og.save_polygonal_surface2D, 
-            "save_viewable": g_vo.save_viewable_triangulated_surface2D
+            "save_viewable": g_vo.save_viewable_polygonal_surface2D
         },
         "PolygonalSurface3D": {
             "input": [ og.PolygonalSurfaceInputFactory3D ], 
             "output": [ og.PolygonalSurfaceOutputFactory3D ], 
             "load": og.load_polygonal_surface3D, 
             "save": og.save_polygonal_surface3D, 
-            "save_viewable": g_vo.save_viewable_triangulated_surface3D
+            "save_viewable": g_vo.save_viewable_polygonal_surface3D
         },
         "PolyhedralSolid3D": {
             "input": [ og.PolyhedralSolidInputFactory3D ], 
@@ -88,7 +88,7 @@ def objects_list():
             "output": [ og.RegularGridOutputFactory2D ], 
             "load": og.load_regular_grid2D, 
             "save": og.save_regular_grid2D, 
-            "save_viewable": ""
+            "save_viewable": g_vo.save_viewable_regular_grid2D
         },
         "RegularGrid3D": {
             "input": [ og.RegularGridInputFactory3D ], 
@@ -109,7 +109,7 @@ def objects_list():
             "output": [ og.BRepOutputFactory, og_gs.StructuralModelOutputFactory ], 
             "load": og_gs.load_structural_model, 
             "save": og_gs.save_structural_model, 
-            "save_viewable": g_vo.save_viewable_brep
+            "save_viewable": g_vo.save_viewable_structural_model
         },
         "TetrahedralSolid3D": {
             "input": [ og.TetrahedralSolidInputFactory3D ], 
@@ -123,7 +123,7 @@ def objects_list():
             "output": [ og.TriangulatedSurfaceOutputFactory2D ], 
             "load": og.load_triangulated_surface2D, 
             "save": og.save_triangulated_surface2D, 
-            "save_viewable": g_vo.save_viewable_brep
+            "save_viewable": g_vo.save_viewable_triangulated_surface2D
         },
         "TriangulatedSurface3D": {
             "input": [ og.TriangulatedSurfaceInputFactory3D ], 
