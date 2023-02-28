@@ -41,22 +41,22 @@ def uploadfile():
     try:
         DATA_FOLDER = flask.current_app.config['DATA_FOLDER']
         file = flask.request.form.get('file')
-        filename = flask.request.form.get('filename')
-        filesize = flask.request.form.get('filesize')
+        old_file_name = flask.request.form.get('old_file_name')
+        file_size = flask.request.form.get('file_size')
         
         if file is None:
             return flask.make_response({"error_message": "No file sent"}, 400)
-        if filename is None:
-            return flask.make_response({"error_message": "No filename sent"}, 400)
-        if filesize is None:
-            return flask.make_response({"error_message": "No filesize sent"}, 400)
+        if old_file_name is None:
+            return flask.make_response({"error_message": "No old_file_name sent"}, 400)
+        if file_size is None:
+            return flask.make_response({"error_message": "No file_size sent"}, 400)
         
-        newFileName = werkzeug.utils.secure_filename(filename)
-        uploadedFile = functions.UploadFile(file, newFileName, DATA_FOLDER, filesize)
-        if not uploadedFile:
+        new_file_name = werkzeug.utils.secure_old_file_name(old_file_name)
+        uploaded_file = functions.UploadFile(file, new_file_name, DATA_FOLDER, file_size)
+        if not uploaded_file:
             flask.make_response({"error_message": "File not uploaded"}, 500)
             
-        return flask.make_response({"newFilename": newFileName}, 200)
+        return flask.make_response({"new_file_name": new_file_name }, 200)
     except Exception as e:
         print("error : ", str(e))
         return flask.make_response({"error_message": str(e)}, 500)
@@ -65,37 +65,43 @@ def uploadfile():
 def convertfile():
     try:
         UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
-        object_type = flask.request.form.get('object')
+        object_type = flask.request.form.get('object_type')
         file = flask.request.form.get('file')
-        filename = flask.request.form.get('filename')
-        filesize = flask.request.form.get('filesize')
-        extension = flask.request.form.get('extension')
+        old_file_name = flask.request.form.get('old_file_name')
+        file_size = flask.request.form.get('file_size')
+        new_extension = flask.request.form.get('new_extension')
 
         if object is None:
             return flask.make_response({"error_message": "No object sent"}, 400)
         if file is None:
             return flask.make_response({"error_message": "No file sent"}, 400)
-        if filename is None:
-            return flask.make_response({"error_message": "No filename sent"}, 400)
-        if filesize is None:
-            return flask.make_response({"error_message": "No filesize sent"}, 400)
-        if extension is None:
-            return flask.make_response({"error_message": "No extension sent"}, 400)
+        if old_file_name is None:
+            return flask.make_response({"error_message": "No old_file_name sent"}, 400)
+        if file_size is None:
+            return flask.make_response({"error_message": "No file_size sent"}, 400)
+        if new_extension is None:
+            return flask.make_response({"error_message": "No new_extension sent"}, 400)
         
-        secureFilename = werkzeug.utils.secure_filename(filename)
-        filePath = os.path.join(UPLOAD_FOLDER, secureFilename)
-        strictFileName = os.path.splitext(secureFilename)[0]
-        newFileName = strictFileName + '.' + extension
 
-        uploadedFile = functions.UploadFile(file, filename, UPLOAD_FOLDER, filesize)
-        if not uploadedFile:
+        secure_file_name = werkzeug.utils.secure_filename(old_file_name)
+        file_path = os.path.join(UPLOAD_FOLDER, secure_file_name)
+        id = str(uuid.uuid4()).replace('-', '')
+        new_file_name = id + '.' + new_extension
+
+        uploaded_file = functions.upload_file(file, old_file_name, UPLOAD_FOLDER, file_size)
+        if not uploaded_file:
             flask.make_response({"error_message": "File not uploaded"}, 500)
 
-        newFilePath = os.path.join(UPLOAD_FOLDER, newFileName)
-        model = geode_objects.objects_list()[object_type]['load'](filePath)
-        functions.geode_objects.objects_list()[object_type]['save'](model, newFilePath)
+        new_file_path = os.path.join(UPLOAD_FOLDER, new_file_name)
+        print(f'{file_path}')
+        model = geode_objects.objects_list()[object_type]['load'](file_path)
+        functions.geode_objects.objects_list()[object_type]['save'](model, new_file_path)
             
-        return flask.make_response({"newFilename": newFileName}, 200)
+        return flask.make_response({
+                                    "new_file_name": new_file_name,
+                                    "old_file_name": old_file_name,
+                                    "id" : id
+                                    }, 200)
     except Exception as e:
-        print("error : ", str(e))
+        print("error : ", str(e), flush=True)
         return flask.make_response({"error_message": str(e)}, 500)
