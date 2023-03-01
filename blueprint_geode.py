@@ -100,10 +100,9 @@ def convertfile():
             flask.make_response({"error_message": "File not uploaded"}, 500)
 
         new_file_path = os.path.join(UPLOAD_FOLDER, id)
-        print(f'{file_path}')
         model = geode_objects.objects_list()[object_type]['load'](file_path)
-        new_file_name = functions.geode_objects.objects_list()[object_type]['save_viewable'](model, new_file_path).split('/')[-1]
-        print(f'{new_file_name=}', flush=True)
+        new_file_path = functions.geode_objects.objects_list()[object_type]['save_viewable'](model, new_file_path)
+        new_file_name = new_file_path.split('/')[-1]
 
         return flask.make_response({
                                     "new_file_name": new_file_name,
