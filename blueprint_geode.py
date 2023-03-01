@@ -26,6 +26,18 @@ def createbackend():
 @geode_routes.route('/healthcheck', methods=['GET'])
 def healthcheck():
     return flask.make_response({"message": "healthy"}, 200)
+@geode_routes.route('/allowedfiles', methods=['GET'])
+def allowedfiles():
+    extensions = functions.ListAllInputExtensions()
+    return {"status": 200, "extensions": extensions}
+@geode_routes.route('/allowedobjects', methods=['POST'])
+def allowedobjects():
+    filename = flask.request.form.get('filename')
+    if filename is None:
+        return flask.make_response({"error_message": "No file sent"}, 400)
+    file_extension = os.path.splitext(filename)[1][1:]
+    objects = functions.ListObjects(file_extension)
+    return flask.make_response({"objects": objects}, 200)
 @geode_routes.route('/ping', methods=['GET', 'POST'])
 def ping():
     LOCK_FOLDER = flask.current_app.config['LOCK_FOLDER']
