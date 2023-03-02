@@ -26,6 +26,18 @@ def createbackend():
 @geode_routes.route('/healthcheck', methods=['GET'])
 def healthcheck():
     return flask.make_response({"message": "healthy"}, 200)
+@geode_routes.route('/allowedfiles', methods=['GET'])
+def allowedfiles():
+    extensions = functions.ListAllInputExtensions()
+    return {"status": 200, "extensions": extensions}
+@geode_routes.route('/allowedobjects', methods=['POST'])
+def allowedobjects():
+    filename = flask.request.form.get('filename')
+    if filename is None:
+        return flask.make_response({"error_message": "No file sent"}, 400)
+    file_extension = os.path.splitext(filename)[1][1:]
+    objects = functions.ListObjects(file_extension)
+    return flask.make_response({"objects": objects}, 200)
 @geode_routes.route('/ping', methods=['GET', 'POST'])
 def ping():
     LOCK_FOLDER = flask.current_app.config['LOCK_FOLDER']
@@ -88,10 +100,9 @@ def convertfile():
             flask.make_response({"error_message": "File not uploaded"}, 500)
 
         new_file_path = os.path.join(UPLOAD_FOLDER, id)
-        print(f'{file_path}')
         model = geode_objects.objects_list()[object_type]['load'](file_path)
-        new_file_name = functions.geode_objects.objects_list()[object_type]['save_viewable'](model, new_file_path).split('/')[-1]
-        print(f'{new_file_name=}', flush=True)
+        new_file_path = functions.geode_objects.objects_list()[object_type]['save_viewable'](model, new_file_path)
+        new_file_name = new_file_path.split('/')[-1]
 
         return flask.make_response({
                                     "new_file_name": new_file_name,
