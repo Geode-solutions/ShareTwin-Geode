@@ -5,6 +5,7 @@ import functions
 import werkzeug
 import geode_objects
 import uuid
+import shutil
 
 geode_routes = flask.Blueprint('geode_routes', __name__)
 flask_cors.CORS(geode_routes)
@@ -109,6 +110,23 @@ def convertfile():
                                     "old_file_name": old_file_name,
                                     "id" : id
                                     }, 200)
+    except Exception as e:
+        print("error : ", str(e), flush=True)
+        return flask.make_response({"error_message": str(e)}, 500)
+
+@geode_routes.route('/delete_all_files', methods=['DELETE'])
+def delete_all_files():
+    try:
+        UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
+        for filename in os.listdir(UPLOAD_FOLDER):
+            f = os.path.join(UPLOAD_FOLDER, filename)
+            if os.path.isfile(f):
+                print(f)
+                os.remove(f)
+            else:
+                shutil.rmtree(f)
+
+        return flask.make_response({ "message": "deleted" }, 204)
     except Exception as e:
         print("error : ", str(e), flush=True)
         return flask.make_response({"error_message": str(e)}, 500)
