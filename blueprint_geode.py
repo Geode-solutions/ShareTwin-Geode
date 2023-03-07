@@ -27,12 +27,12 @@ def createbackend():
 @geode_routes.route('/healthcheck', methods=['GET'])
 def healthcheck():
     return flask.make_response({"message": "healthy"}, 200)
-@geode_routes.route('/allowedfiles', methods=['GET'])
-def allowedfiles():
+@geode_routes.route('/get_allowed_files', methods=['GET'])
+def get_allowed_files():
     extensions = functions.ListAllInputExtensions()
     return {"status": 200, "extensions": extensions}
-@geode_routes.route('/allowedobjects', methods=['POST'])
-def allowedobjects():
+@geode_routes.route('/get_allowed_objects', methods=['POST'])
+def get_allowed_objects():
     filename = flask.request.form.get('filename')
     if filename is None:
         return flask.make_response({"error_message": "No file sent"}, 400)
@@ -49,8 +49,8 @@ def ping():
         f.close()
     return flask.make_response({"message": "Flask server is running"}, 200)
 
-@geode_routes.route('/uploadfile', methods=['POST'])
-def uploadfile():
+@geode_routes.route('/upload_file', methods=['POST'])
+def upload_file():
     try:
         DATA_FOLDER = flask.current_app.config['DATA_FOLDER']
         file = flask.request.form.get('file')
@@ -74,8 +74,8 @@ def uploadfile():
         print("error : ", str(e))
         return flask.make_response({"error_message": str(e)}, 500)
 
-@geode_routes.route('/convertfile', methods=['POST'])
-def convertfile():
+@geode_routes.route('/convert_file', methods=['POST'])
+def convert_file():
     try:
         UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
         object_type = flask.request.form.get('object_type')
@@ -83,8 +83,8 @@ def convertfile():
         old_file_name = flask.request.form.get('old_file_name')
         file_size = flask.request.form.get('file_size')
 
-        if object is None:
-            return flask.make_response({"error_message": "No object sent"}, 400)
+        if object_type is None:
+            return flask.make_response({"error_message": "No object_type sent"}, 400)
         if file is None:
             return flask.make_response({"error_message": "No file sent"}, 400)
         if old_file_name is None:
@@ -127,6 +127,27 @@ def delete_all_files():
                 shutil.rmtree(f)
 
         return flask.make_response({ "message": "deleted" }, 204)
+    except Exception as e:
+        print("error : ", str(e), flush=True)
+        return flask.make_response({"error_message": str(e)}, 500)
+
+@geode_routes.route('/get_texture_coordinates', methods=['GET'])
+def get_texture_coordinates():
+    try:
+        UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
+        object_type = flask.request.form.get('object_type')
+        file_name = flask.request.form.get('file_name')
+
+        if object_type is None:
+            return flask.make_response({"error_message": "No object_type sent"}, 400)
+        if file_name is None:
+            return flask.make_response({"error_message": "No file sent"}, 400)
+
+        file_path = os.path.join(UPLOAD_FOLDER, file_name)
+        model = geode_objects.objects_list()[object_type]['load'](file_path)
+        texture_coordinates = model.texture_names()
+
+        return flask.make_response({ "texture_coordinates": texture_coordinates }, 200)
     except Exception as e:
         print("error : ", str(e), flush=True)
         return flask.make_response({"error_message": str(e)}, 500)
