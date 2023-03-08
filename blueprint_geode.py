@@ -131,10 +131,11 @@ def delete_all_files():
         print("error : ", str(e), flush=True)
         return flask.make_response({"error_message": str(e)}, 500)
 
-@geode_routes.route('/get_texture_coordinates', methods=['GET'])
+@geode_routes.route('/get_texture_coordinates', methods=['POST'])
 def get_texture_coordinates():
     try:
         UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
+        # UPLOAD_FOLDER = 'C:/Users/JulienChampagnol/Desktop/Data_private'
         object_type = flask.request.form.get('object_type')
         file_name = flask.request.form.get('file_name')
 
@@ -145,7 +146,7 @@ def get_texture_coordinates():
 
         file_path = os.path.join(UPLOAD_FOLDER, file_name)
         model = geode_objects.objects_list()[object_type]['load'](file_path)
-        texture_coordinates = model.texture_names()
+        texture_coordinates = model.texture_manager().texture_names()
 
         return flask.make_response({ "texture_coordinates": texture_coordinates }, 200)
     except Exception as e:
