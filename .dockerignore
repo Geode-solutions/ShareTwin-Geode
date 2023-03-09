@@ -5,3 +5,5 @@ uploads
 .env
 .vscode
 lock
+requirements.in
+.github

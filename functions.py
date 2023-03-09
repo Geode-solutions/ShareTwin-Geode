@@ -75,26 +75,26 @@ def GetVersions(list_packages: list):
         list_with_versions.append({"package": package, "version": pkg_resources.get_distribution(package).version})
     return list_with_versions
 
-def UploadFile(file: str, filename: str, uploadFolder: str, filesize: int):
-    if not os.path.exists(uploadFolder):
-        os.mkdir(uploadFolder)
-    fileDecoded = base64.b64decode(file.split(',')[-1])
-    secureFilename = werkzeug.utils.secure_filename(filename)
-    filePath = os.path.join(uploadFolder, secureFilename)
-    f = open(filePath, "wb")
-    f.write(fileDecoded)
+def upload_file(file: str, file_name: str, upload_folder: str, file_size: int):
+    if not os.path.exists(upload_folder):
+        os.mkdir(upload_folder)
+    file_decoded = base64.b64decode(file.split(',')[-1])
+    secure_file_name = werkzeug.utils.secure_filename(file_name)
+    file_path = os.path.join(upload_folder, secure_file_name)
+    f = open(file_path, "wb")
+    f.write(file_decoded)
     f.close()
 
-    finalSize =  os.path.getsize(filePath)
-    return int(filesize) == int(finalSize)
+    final_size =  os.path.getsize(file_path)
+    return int(file_size) == int(final_size)
 
 def create_lock_file():
     LOCK_FOLDER = flask.current_app.config['LOCK_FOLDER']
     if not os.path.exists(LOCK_FOLDER):
         os.mkdir(LOCK_FOLDER)
     flask.g.UUID = uuid.uuid4()
-    filePath = f'{LOCK_FOLDER}/{str(flask.g.UUID)}.txt'
-    f = open(filePath, 'a')
+    file_path = f'{LOCK_FOLDER}/{str(flask.g.UUID)}.txt'
+    f = open(file_path, 'a')
     f.close()
 
 def remove_lock_file():
