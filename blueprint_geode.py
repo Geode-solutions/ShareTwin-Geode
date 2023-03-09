@@ -49,31 +49,6 @@ def ping():
         f.close()
     return flask.make_response({"message": "Flask server is running"}, 200)
 
-@geode_routes.route('/upload_file', methods=['POST'])
-def upload_file():
-    try:
-        DATA_FOLDER = flask.current_app.config['DATA_FOLDER']
-        file = flask.request.form.get('file')
-        old_file_name = flask.request.form.get('old_file_name')
-        file_size = flask.request.form.get('file_size')
-        
-        if file is None:
-            return flask.make_response({"error_message": "No file sent"}, 400)
-        if old_file_name is None:
-            return flask.make_response({"error_message": "No old_file_name sent"}, 400)
-        if file_size is None:
-            return flask.make_response({"error_message": "No file_size sent"}, 400)
-        
-        new_file_name = werkzeug.utils.secure_old_file_name(old_file_name)
-        uploaded_file = functions.UploadFile(file, new_file_name, DATA_FOLDER, file_size)
-        if not uploaded_file:
-            flask.make_response({"error_message": "File not uploaded"}, 500)
-            
-        return flask.make_response({"new_file_name": new_file_name }, 200)
-    except Exception as e:
-        print("error : ", str(e))
-        return flask.make_response({"error_message": str(e)}, 500)
-
 @geode_routes.route('/convert_file', methods=['POST'])
 def convert_file():
     try:
@@ -96,18 +71,28 @@ def convert_file():
         file_path = os.path.join(UPLOAD_FOLDER, secure_file_name)
         id = str(uuid.uuid4()).replace('-', '')
 
-        uploaded_file = functions.upload_file(file, old_file_name, UPLOAD_FOLDER, file_size)
+        uploaded_file = functions.upload_file(file, secure_file_name, UPLOAD_FOLDER, file_size)
         if not uploaded_file:
             flask.make_response({"error_message": "File not uploaded"}, 500)
 
-        new_file_path = os.path.join(UPLOAD_FOLDER, id)
         model = geode_objects.objects_list()[object_type]['load'](file_path)
-        new_file_path = functions.geode_objects.objects_list()[object_type]['save_viewable'](model, new_file_path)
-        new_file_name = new_file_path.split('/')[-1]
+
+        model_name = model.name()
+        native_extension = model.native_extension()
+
+        viewable_model_file_path = os.path.join(UPLOAD_FOLDER, id)
+        native_model_file_path = os.path.join(UPLOAD_FOLDER, id + '.' + native_extension)
+
+        saved_native_model_file_path = functions.geode_objects.objects_list()[object_type]['save_viewable'](model, viewable_model_file_path)
+        saved_viewable_model_file_path = functions.geode_objects.objects_list()[object_type]['save'](model, native_model_file_path)
+
+        native_model_file_name = saved_native_model_file_path.split('/')[-1]
+        viewable_model_file_name = saved_viewable_model_file_path.split('/')[-1]
 
         return flask.make_response({
-                                    "new_file_name": new_file_name,
-                                    "old_file_name": old_file_name,
+                                    "model_name": model_name,
+                                    "native_model_file_name": native_model_file_name,
+                                    "viewable_model_file_name": viewable_model_file_name,
                                     "id" : id
                                     }, 200)
     except Exception as e:
@@ -135,17 +120,16 @@ def delete_all_files():
 def get_texture_coordinates():
     try:
         UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
-        # UPLOAD_FOLDER = 'C:/Users/JulienChampagnol/Desktop/Data_private'
-        object_type = flask.request.form.get('object_type')
         file_name = flask.request.form.get('file_name')
+        geode_object = flask.request.form.get('geode_object')
 
-        if object_type is None:
-            return flask.make_response({"error_message": "No object_type sent"}, 400)
+        if geode_object is None:
+            return flask.make_response({"error_message": "No geode_object sent"}, 400)
         if file_name is None:
             return flask.make_response({"error_message": "No file sent"}, 400)
 
         file_path = os.path.join(UPLOAD_FOLDER, file_name)
-        model = geode_objects.objects_list()[object_type]['load'](file_path)
+        model = geode_objects.objects_list()[geode_object]['load'](file_path)
         texture_coordinates = model.texture_manager().texture_names()
 
         return flask.make_response({ "texture_coordinates": texture_coordinates }, 200)
