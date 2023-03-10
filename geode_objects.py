@@ -11,6 +11,7 @@ def objects_list():
             "output": [ og.BRepOutputFactory ],
             "load": og.load_brep,
             "save": og.save_brep,
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_brep
         },
         "CrossSection": {
@@ -18,6 +19,7 @@ def objects_list():
             "output": [ og.SectionOutputFactory, og_gs.CrossSectionOutputFactory ],
             "load": og_gs.load_cross_section,
             "save": og_gs.save_cross_section,
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_cross_section
         },
         "EdgedCurve2D": {
@@ -25,6 +27,7 @@ def objects_list():
             "output": [ og.EdgedCurveOutputFactory2D ],
             "load": og.load_edged_curve2D,
             "save": og.save_edged_curve2D,
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_edged_curve2D
         },
         "EdgedCurve3D": {
@@ -32,6 +35,7 @@ def objects_list():
             "output": [ og.EdgedCurveOutputFactory3D ], 
             "load": og.load_edged_curve3D, 
             "save": og.save_edged_curve3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_edged_curve3D
         },
         "Graph": {
@@ -39,6 +43,7 @@ def objects_list():
             "output": [ og.GraphOutputFactory ], 
             "load": og.load_graph, 
             "save": og.save_graph, 
+            "is_viewable": True,
             "save_viewable": ""
         },
         "HybridSolid3D": {
@@ -46,6 +51,7 @@ def objects_list():
             "output": [ og.HybridSolidOutputFactory3D ], 
             "load": og.load_hybrid_solid3D, 
             "save": og.save_hybrid_solid3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_hybrid_solid3D
         },
         "PointSet2D": {
@@ -53,6 +59,7 @@ def objects_list():
             "output": [ og.PointSetOutputFactory2D ], 
             "load": og.load_point_set2D, 
             "save": og.save_point_set2D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_point_set2D
         },
         "PointSet3D": {
@@ -60,6 +67,7 @@ def objects_list():
             "output": [ og.PointSetOutputFactory3D ], 
             "load": og.load_point_set3D, 
             "save": og.save_point_set3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_point_set3D
         },
         "PolygonalSurface2D": {
@@ -67,6 +75,7 @@ def objects_list():
             "output": [ og.PolygonalSurfaceOutputFactory2D ], 
             "load": og.load_polygonal_surface2D, 
             "save": og.save_polygonal_surface2D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_polygonal_surface2D
         },
         "PolygonalSurface3D": {
@@ -74,6 +83,7 @@ def objects_list():
             "output": [ og.PolygonalSurfaceOutputFactory3D ], 
             "load": og.load_polygonal_surface3D, 
             "save": og.save_polygonal_surface3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_polygonal_surface3D
         },
         "PolyhedralSolid3D": {
@@ -81,13 +91,31 @@ def objects_list():
             "output": [ og.PolyhedralSolidOutputFactory3D ], 
             "load": og.load_polyhedral_solid3D, 
             "save": og.save_polyhedral_solid3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_polyhedral_solid3D
+        },
+        "RasterImage2D": {
+            "input": [ og.RasterImageInputFactory2D ],
+            "output": [ og.RasterImageOutputFactory2D ], 
+            "load": og.load_raster_image2D, 
+            "save": og.save_raster_image2D,
+            "is_viewable": False,
+            "save_viewable": g_vo.save_viewable_raster_image2D
+        },
+        "RasterImage3D": {
+            "input": [ og.RasterImageInputFactory3D ],
+            "output": [ og.RasterImageOutputFactory3D ], 
+            "load": og.load_raster_image3D, 
+            "save": og.save_raster_image3D,
+            "is_viewable": False,
+            "save_viewable": g_vo.save_viewable_raster_image3D
         },
         "RegularGrid2D": {
             "input": [ og.RegularGridInputFactory2D ],
             "output": [ og.RegularGridOutputFactory2D ], 
             "load": og.load_regular_grid2D, 
             "save": og.save_regular_grid2D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_regular_grid2D
         },
         "RegularGrid3D": {
@@ -95,6 +123,7 @@ def objects_list():
             "output": [ og.RegularGridOutputFactory3D ], 
             "load": og.load_regular_grid3D, 
             "save": og.save_regular_grid3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_regular_grid3D
         },
         "Section": {
@@ -102,6 +131,7 @@ def objects_list():
             "output": [ og.SectionOutputFactory ], 
             "load": og.load_section, 
             "save": og.save_section, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_section 
         },
         "StructuralModel": {
@@ -109,6 +139,7 @@ def objects_list():
             "output": [ og.BRepOutputFactory, og_gs.StructuralModelOutputFactory ], 
             "load": og_gs.load_structural_model, 
             "save": og_gs.save_structural_model, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_structural_model
         },
         "TetrahedralSolid3D": {
@@ -116,6 +147,7 @@ def objects_list():
             "output": [ og.TetrahedralSolidOutputFactory3D ], 
             "load": og.load_tetrahedral_solid3D,
             "save": og.save_tetrahedral_solid3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_tetrahedral_solid3D
         },
         "TriangulatedSurface2D": {
@@ -123,6 +155,7 @@ def objects_list():
             "output": [ og.TriangulatedSurfaceOutputFactory2D ], 
             "load": og.load_triangulated_surface2D, 
             "save": og.save_triangulated_surface2D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_triangulated_surface2D
         },
         "TriangulatedSurface3D": {
@@ -130,6 +163,7 @@ def objects_list():
             "output": [ og.TriangulatedSurfaceOutputFactory3D ], 
             "load": og.load_triangulated_surface3D, 
             "save": og.save_triangulated_surface3D, 
+            "is_viewable": True,
             "save_viewable": g_vo.save_viewable_triangulated_surface3D
         },
         "VertexSet": {
@@ -137,6 +171,7 @@ def objects_list():
             "output": [ og.VertexSetOutputFactory ], 
             "load": og.load_vertex_set, 
             "save": og.save_vertex_set, 
+            "is_viewable": False,
             "save_viewable": ""
         }
     }
