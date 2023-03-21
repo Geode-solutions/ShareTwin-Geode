@@ -34,7 +34,7 @@ markupsafe==2.1.2
     # via
     #   jinja2
     #   werkzeug
-opengeode-core==13.3.6
+opengeode-core==13.3.8
     # via
     #   -r requirements.in
     #   geode-common
