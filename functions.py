@@ -6,7 +6,7 @@ import werkzeug
 import flask
 import uuid
 
-def list_objects_input_extensions(geode_objects: array = [],is_viewable: bool=True):
+def list_objects_input_extensions(geode_objects: list = [],is_viewable: bool=True):
     """
     Purpose:
         Function that returns a list of all input extensions

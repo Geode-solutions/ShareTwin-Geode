@@ -32,7 +32,7 @@ def get_allowed_files():
     extensions = functions.list_objects_input_extensions()
     return {"status": 200, "extensions": extensions}
 @geode_routes.route('/get_object_allowed_files', methods=['POST'])
-def get_allowed_files():
+def get_object_allowed_files():
     geode_objects = flask.request.form.get('geode_objects') 
     extensions = functions.list_objects_input_extensions(geode_objects)
     return {"status": 200, "extensions": extensions}
@@ -82,14 +82,20 @@ def convert_file():
 
         data = geode_objects.objects_list()[object_type]['load'](file_path)
 
-        name = data.name()
+        if geode_objects.objects_list()[object_type]['is_viewable']:
+            name = data.name()
+        else:
+            name = old_file_name
+            
         native_extension = data.native_extension()
 
         viewable_file_path = os.path.join(UPLOAD_FOLDER, id)
         native_file_path = os.path.join(UPLOAD_FOLDER, id + '.' + native_extension)
 
         saved_viewable_file_path = functions.geode_objects.objects_list()[object_type]['save_viewable'](data, viewable_file_path)
+        print('Saved viewable', flush=True)
         functions.geode_objects.objects_list()[object_type]['save'](data, native_file_path)
+        print('Saved native', flush=True)
 
 
         native_file_name = os.path.basename(native_file_path)
