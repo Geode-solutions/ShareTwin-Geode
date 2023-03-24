@@ -27,17 +27,17 @@ def createbackend():
 @geode_routes.route('/healthcheck', methods=['GET'])
 def healthcheck():
     return flask.make_response({"message": "healthy"}, 200)
-@geode_routes.route('/get_allowed_files', methods=['GET'])
-def get_allowed_files():
+@geode_routes.route('/allowed_files', methods=['GET'])
+def allowed_files():
     extensions = functions.list_objects_input_extensions()
     return {"status": 200, "extensions": extensions}
-@geode_routes.route('/get_object_allowed_files', methods=['POST'])
-def get_object_allowed_files():
+@geode_routes.route('/object_allowed_files', methods=['POST'])
+def object_allowed_files():
     geode_objects = flask.request.form.get('geode_objects') 
     extensions = functions.list_objects_input_extensions(geode_objects)
     return {"status": 200, "extensions": extensions}
-@geode_routes.route('/get_allowed_objects', methods=['POST'])
-def get_allowed_objects():
+@geode_routes.route('/allowed_objects', methods=['POST'])
+def allowed_objects():
     filename = flask.request.form.get('filename')
     if filename is None:
         return flask.make_response({"error_message": "No file sent"}, 400)
