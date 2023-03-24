@@ -128,8 +128,8 @@ def delete_all_files():
         print("error : ", str(e), flush=True)
         return flask.make_response({"error_message": str(e)}, 500)
 
-@geode_routes.route('/get_texture_coordinates', methods=['POST'])
-def get_texture_coordinates():
+@geode_routes.route('/texture_coordinates', methods=['POST'])
+def texture_coordinates():
     try:
         UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
         native_file_name = flask.request.form.get('native_file_name')
@@ -148,28 +148,3 @@ def get_texture_coordinates():
     except Exception as e:
         print("error : ", str(e), flush=True)
         return flask.make_response({"error_message": str(e)}, 500)
-
-
-@geode_routes.route('/convert_viewable_raster_image', methods=['POST'])
-def convert_viewable_raster_image():
-    try:
-        UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
-        native_file_name = flask.request.form.get('native_file_name')
-        geode_object = flask.request.form.get('geode_object')
-
-        if geode_object is None:
-            return flask.make_response({"error_message": "No geode_object sent"}, 400)
-        if native_file_name is None:
-            return flask.make_response({"error_message": "No native_file_name sent"}, 400)
-
-        native_file_path = os.path.join(UPLOAD_FOLDER, native_file_name)
-        data = geode_objects.objects_list()[geode_object]['load'](native_file_path)
-        texture_coordinates = data.texture_manager().texture_names()
-
-        return flask.make_response({ "texture_coordinates": texture_coordinates }, 200)
-    except Exception as e:
-        print("error : ", str(e), flush=True)
-        return flask.make_response({"error_message": str(e)}, 500)
-
-
-        save_viewable_raster_image2D
