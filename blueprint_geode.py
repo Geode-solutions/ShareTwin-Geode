@@ -29,12 +29,14 @@ def healthcheck():
     return flask.make_response({"message": "healthy"}, 200)
 @geode_routes.route('/allowed_files', methods=['GET'])
 def allowed_files():
-    extensions = functions.list_objects_input_extensions()
+    extensions = functions.list_objects_input_extensions(True)
     return {"status": 200, "extensions": extensions}
 @geode_routes.route('/object_allowed_files', methods=['POST'])
 def object_allowed_files():
-    geode_objects = flask.request.form.get('geode_objects') 
-    extensions = functions.list_objects_input_extensions(geode_objects)
+    geode_object = flask.request.form.get('geode_object')
+    if geode_object is None:
+        return flask.make_response({"error_message": "No geode_object sent"}, 400)
+    extensions = functions.list_objects_input_extensions(False, geode_object)
     return {"status": 200, "extensions": extensions}
 @geode_routes.route('/allowed_objects', methods=['POST'])
 def allowed_objects():
