@@ -6,27 +6,28 @@ import werkzeug
 import flask
 import uuid
 
-def ListAllInputExtensions():
+def list_objects_input_extensions(is_viewable: bool = True, geode_object: str = '', ):
     """
     Purpose:
         Function that returns a list of all input extensions
     Returns:
         An ordered list of input file extensions
     """
-    List = []
+    return_list = []
     objects_list = geode_objects.objects_list()
 
-    for Object in objects_list.values():
-        values = Object['input']
-        for value in values:
-            list_creators = value.list_creators()
-            for creator in list_creators:
-                if creator not in List:
-                    List.append(creator)
-    List.sort()
-    return List
+    for object_ in objects_list.values():
+        if object_['is_viewable'] == is_viewable or geode_object == object_:
+            values = object_['input']
+            for value in values:
+                list_creators = value.list_creators()
+                for creator in list_creators:
+                    if creator not in return_list:
+                        return_list.append(creator)
+    return_list.sort()
+    return return_list
 
-def ListObjects(extension: str):
+def list_objects(extension: str, is_viewable: bool=True):
     """
     Purpose:
         Function that returns a list of objects that can handle a file, given his extension
@@ -35,19 +36,20 @@ def ListObjects(extension: str):
     Returns:
         An ordered list of object's names
     """
-    List = []
+    return_list = []
     objects_list = geode_objects.objects_list()
 
-    for Object, values in objects_list.items():
-        list_values = values['input']
-        for value in list_values:
-            if value.has_creator(extension):
-                if Object not in List:
-                    List.append(Object)
-    List.sort()
-    return List
+    for object_, values in objects_list.items():
+        if values['is_viewable'] == is_viewable:
+            list_values = values['input']
+            for value in list_values:
+                if value.has_creator(extension):
+                    if object_ not in return_list:
+                        return_list.append(object_)
+    return_list.sort()
+    return return_list
 
-def ListOutputFileExtensions(object: str):
+def list_output_file_extensions(object: str):
     """
     Purpose:
         Function that returns a list of output file extensions that can be handled by an object
@@ -69,7 +71,7 @@ def ListOutputFileExtensions(object: str):
     return List
 
 
-def GetVersions(list_packages: list):
+def get_versions(list_packages: list):
     list_with_versions = []
     for package in list_packages:
         list_with_versions.append({"package": package, "version": pkg_resources.get_distribution(package).version})
