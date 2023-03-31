@@ -20,9 +20,9 @@ flask[async]==2.2.3
     #   flask-cors
 flask-cors==3.0.10
     # via -r requirements.in
-geode-common==23.2.5
+geode-common==24.0.3
     # via geode-viewableobjects
-geode-viewableobjects==1.4.1
+geode-viewableobjects==1.4.3
     # via -r requirements.in
 importlib-metadata==6.1.0
     # via flask
@@ -34,7 +34,7 @@ markupsafe==2.1.2
     # via
     #   jinja2
     #   werkzeug
-opengeode-core==13.3.15
+opengeode-core==13.4.1
     # via
     #   -r requirements.in
     #   geode-common
@@ -42,16 +42,16 @@ opengeode-core==13.3.15
     #   opengeode-geosciences
     #   opengeode-geosciencesio
     #   opengeode-io
-opengeode-geosciences==6.0.1
+opengeode-geosciences==6.0.2
     # via
     #   -r requirements.in
     #   geode-viewableobjects
     #   opengeode-geosciencesio
-opengeode-geosciencesio==3.14.3
+opengeode-geosciencesio==3.14.4
     # via
     #   -r requirements.in
     #   geode-viewableobjects
-opengeode-io==5.25.3
+opengeode-io==5.25.4
     # via
     #   -r requirements.in
     #   geode-viewableobjects
