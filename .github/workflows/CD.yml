@@ -4,30 +4,10 @@ on:
   push:
     branches: [ master, develop ] 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.9"
-    - name: GithubPackages Login
-      uses: docker/login-action@v1.10.0
-      with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v3
-      with:
-        images: ghcr.io/${{ github.repository }}
-    - name: Build and push Docker images
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+  docker-build-squash-push:
+    uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
+    with:
+      image_name: 'sharetwin_geode'
+      tag: ${{ github.ref_name }}
+    secrets: 
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
