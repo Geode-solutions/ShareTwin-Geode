@@ -8,6 +8,7 @@ class Config(object):
     UPLOAD_FOLDER = '/data'
     LOCK_FOLDER = './lock'
 
+
 class ProdConfig(Config):
     SSL = None
     ORIGINS = ['https://share-twin.com', 'https://next.share-twin.com']
