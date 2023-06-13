@@ -2,7 +2,7 @@ import opengeode as og
 import opengeode_io as og_io
 import opengeode_geosciences as og_gs
 import opengeode_geosciencesio as og_gs_io
-import geode_viewableobjects as g_vo
+import geode_viewables as g_vo
 
 def objects_list():
     return {
