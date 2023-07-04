@@ -176,6 +176,30 @@ def texture_coordinates():
         return flask.make_response({"error_message": str(e)}, 500)
 
 
+@geode_routes.route('/coordinate_systems', methods=['POST'])
+def coordinate_systems():
+    try:
+        UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
+        native_file_name = flask.request.form.get('native_file_name')
+        geode_object = flask.request.form.get('geode_object')
+
+        if geode_object is None:
+            return flask.make_response({"error_message": "No geode_object sent"}, 400)
+        if native_file_name is None:
+            return flask.make_response({"error_message": "No native_file_name sent"}, 400)
+
+        native_file_path = os.path.join(UPLOAD_FOLDER, native_file_name)
+        data = geode_objects.objects_list(
+        )[geode_object]['load'](native_file_path)
+        coordinate_systems = data.main_coordinate_reference_system_manager(
+        ).coordinate_reference_system_names()
+
+        return flask.make_response({"coordinate_systems": coordinate_systems}, 200)
+    except Exception as e:
+        print("error : ", str(e), flush=True)
+        return flask.make_response({"error_message": str(e)}, 500)
+
+
 @geode_routes.route('/asign_geographic_coordinate_system', methods=['POST'])
 def asign_geographic_coordinate_system():
     UPLOAD_FOLDER = flask.current_app.config['UPLOAD_FOLDER']
