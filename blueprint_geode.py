@@ -194,7 +194,18 @@ def coordinate_systems():
         coordinate_systems = data.main_coordinate_reference_system_manager(
         ).coordinate_reference_system_names()
 
-        return flask.make_response({"coordinate_systems": coordinate_systems}, 200)
+        list_coordinate_systems = []
+
+        for coordinate_system in coordinate_systems:
+            print(f'{coordinate_system=}')
+            find_coordinate_reference_system = data.main_coordinate_reference_system_manager(
+            ).find_coordinate_reference_system(coordinate_system)
+            type_name = data.main_coordinate_reference_system_manager(
+            ).type_name(coordinate_system)
+            list_coordinate_systems.append(
+                {'name': 'data', 'is_geo': true, 'is_active': true})
+
+        return flask.make_response({"list_coordinate_systems": list_coordinate_systems}, 200)
     except Exception as e:
         print("error : ", str(e), flush=True)
         return flask.make_response({"error_message": str(e)}, 500)
