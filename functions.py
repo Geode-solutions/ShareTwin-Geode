@@ -6,7 +6,11 @@ import werkzeug
 import flask
 import uuid
 
-def list_objects_input_extensions(is_viewable: bool = True, geode_object: str = '', ):
+
+def list_objects_input_extensions(
+    is_viewable: bool = True,
+    geode_object: str = "",
+):
     """
     Purpose:
         Function that returns a list of all input extensions
@@ -17,8 +21,8 @@ def list_objects_input_extensions(is_viewable: bool = True, geode_object: str = 
     objects_list = geode_objects.objects_list()
 
     for object_ in objects_list.values():
-        if object_['is_viewable'] == is_viewable or geode_object == object_:
-            values = object_['input']
+        if object_["is_viewable"] == is_viewable or geode_object == object_:
+            values = object_["input"]
             for value in values:
                 list_creators = value.list_creators()
                 for creator in list_creators:
@@ -27,7 +31,8 @@ def list_objects_input_extensions(is_viewable: bool = True, geode_object: str = 
     return_list.sort()
     return return_list
 
-def list_objects(extension: str, is_viewable: bool=True):
+
+def list_objects(extension: str, is_viewable: bool = True):
     """
     Purpose:
         Function that returns a list of objects that can handle a file, given his extension
@@ -40,14 +45,15 @@ def list_objects(extension: str, is_viewable: bool=True):
     objects_list = geode_objects.objects_list()
 
     for object_, values in objects_list.items():
-        if values['is_viewable'] == is_viewable:
-            list_values = values['input']
+        if values["is_viewable"] == is_viewable:
+            list_values = values["input"]
             for value in list_values:
                 if value.has_creator(extension):
                     if object_ not in return_list:
                         return_list.append(object_)
     return_list.sort()
     return return_list
+
 
 def list_output_file_extensions(object: str):
     """
@@ -61,7 +67,7 @@ def list_output_file_extensions(object: str):
     List = []
     objects_list = geode_objects.objects_list()
 
-    values = objects_list[object]['output']
+    values = objects_list[object]["output"]
     for value in values:
         list_creators = value.list_creators()
         for creator in list_creators:
@@ -74,32 +80,96 @@ def list_output_file_extensions(object: str):
 def get_versions(list_packages: list):
     list_with_versions = []
     for package in list_packages:
-        list_with_versions.append({"package": package, "version": pkg_resources.get_distribution(package).version})
+        list_with_versions.append(
+            {
+                "package": package,
+                "version": pkg_resources.get_distribution(package).version,
+            }
+        )
     return list_with_versions
+
 
 def upload_file(file: str, file_name: str, upload_folder: str, file_size: int):
     if not os.path.exists(upload_folder):
         os.mkdir(upload_folder)
-    file_decoded = base64.b64decode(file.split(',')[-1])
+    file_decoded = base64.b64decode(file.split(",")[-1])
     secure_file_name = werkzeug.utils.secure_filename(file_name)
     file_path = os.path.join(upload_folder, secure_file_name)
     f = open(file_path, "wb")
     f.write(file_decoded)
     f.close()
 
-    final_size =  os.path.getsize(file_path)
+    final_size = os.path.getsize(file_path)
     return int(file_size) == int(final_size)
 
+
 def create_lock_file():
-    LOCK_FOLDER = flask.current_app.config['LOCK_FOLDER']
+    LOCK_FOLDER = flask.current_app.config["LOCK_FOLDER"]
     if not os.path.exists(LOCK_FOLDER):
         os.mkdir(LOCK_FOLDER)
     flask.g.UUID = uuid.uuid4()
-    file_path = f'{LOCK_FOLDER}/{str(flask.g.UUID)}.txt'
-    f = open(file_path, 'a')
+    file_path = f"{LOCK_FOLDER}/{str(flask.g.UUID)}.txt"
+    f = open(file_path, "a")
     f.close()
 
+
 def remove_lock_file():
-    LOCK_FOLDER = flask.current_app.config['LOCK_FOLDER']
-    os.remove(f'{LOCK_FOLDER}/{str(flask.g.UUID)}.txt')
-    
+    LOCK_FOLDER = flask.current_app.config["LOCK_FOLDER"]
+    os.remove(f"{LOCK_FOLDER}/{str(flask.g.UUID)}.txt")
+
+
+def set_interval(func, sec):
+    def func_wrapper():
+        set_interval(func, sec)
+        func()
+
+    t = threading.Timer(sec, func_wrapper)
+    t.daemon = True
+    t.start()
+    return t
+
+
+def is_model(geode_object):
+    return geode_objects.objects_list()[geode_object]["is_model"]
+
+
+def is_3D(geode_object):
+    return geode_objects.objects_list()[geode_object]["is_3D"]
+
+
+def get_builder(geode_object, data):
+    return geode_objects.objects_list()[geode_object]["builder"](data)
+
+
+def get_geographic_coordinate_systems(geode_object):
+    if is_3D(geode_object):
+        return og_gs.GeographicCoordinateSystem3D.geographic_coordinate_systems()
+    else:
+        return og_gs.GeographicCoordinateSystem2D.geographic_coordinate_systems()
+
+
+def get_geographic_coordinate_systems_info(geode_object, crs):
+    if is_3D(geode_object):
+        return og_gs.GeographicCoordinateSystemInfo3D(
+            crs["authority"], crs["code"], crs["name"]
+        )
+    else:
+        return og_gs.GeographicCoordinateSystemInfo2D(
+            crs["authority"], crs["code"], crs["name"]
+        )
+
+
+def asign_geographic_coordinate_system_info(geode_object, data, input_crs):
+    builder = get_builder(geode_object, data)
+    info = get_geographic_coordinate_systems_info(geode_object, input_crs)
+    geode_objects.objects_list()[geode_object]["crs"]["assign"](
+        data, builder, input_crs["name"], info
+    )
+
+
+def convert_geographic_coordinate_system_info(geode_object, data, output_crs):
+    builder = get_builder(geode_object, data)
+    info = get_geographic_coordinate_systems_info(geode_object, output_crs)
+    geode_objects.objects_list()[geode_object]["crs"]["convert"](
+        data, builder, output_crs["name"], info
+    )
