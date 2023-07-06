@@ -235,37 +235,6 @@ def asign_geographic_coordinate_system():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
     geode_object = flask.request.form.get("geode_object")
     id = flask.request.form.get("id")
-    crs_authority = flask.request.form.get("crs_authority")
-    crs_code = flask.request.form.get("crs_code")
-    crs_name = flask.request.form.get("crs_name")
-
-    if geode_object is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No geode_object sent"}, 400
-        )
-    if id is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No id sent"}, 400
-        )
-    if crs_authority is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No crs_authority sent"}, 400
-        )
-    if crs_code is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No crs_code sent"}, 400
-        )
-    if crs_name is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No crs_name sent"}, 400
-        )
-
-
-@geode_routes.route("/asign_geographic_coordinate_system", methods=["POST"])
-def asign_geographic_coordinate_system():
-    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-    geode_object = flask.request.form.get("geode_object")
-    id = flask.request.form.get("id")
     filename = flask.request.form.get("filename")
     crs_authority = flask.request.form.get("crs_authority")
     crs_code = flask.request.form.get("crs_code")
@@ -296,9 +265,100 @@ def asign_geographic_coordinate_system():
             {"name": "Bad Request", "description": "No crs_name sent"}, 400
         )
 
-    viewable_file_path = os.path.join(UPLOAD_FOLDER, id)
-    native_file_path = os.path.join(UPLOAD_FOLDER, id + "." + native_extension)
+    input_crs = {
+        "authority": crs_authority,
+        "code": crs_code,
+        "name": crs_name,
+    }
 
-    saved_viewable_file_path = functions.geode_objects.objects_list()[object_type][
-        "save_viewable"
-    ](data, viewable_file_path)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    data = geode_objects.objects_list()[geode_object]["load"](file_path)
+
+    functions.asign_geographic_coordinate_system_info(geode_object, data, input_crs)
+
+    geode_objects.objects_list()[geode_object]["save"](
+        data, os.path.join(UPLOAD_FOLDER, filename)
+    )
+    geode_objects.objects_list()[geode_object]["save_viewable"](
+        data, os.path.join(UPLOAD_FOLDER, id)
+    )
+
+    return flask.make_response({"message": "files regenerated"}, 200)
+
+
+@geode_routes.route("/convert_geographic_coordinate_system", methods=["POST"])
+def convert_geographic_coordinate_system():
+    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
+    geode_object = flask.request.form.get("geode_object")
+    id = flask.request.form.get("id")
+    filename = flask.request.form.get("filename")
+    input_crs_authority = flask.request.form.get("input_crs_authority")
+    input_crs_code = flask.request.form.get("input_crs_code")
+    input_crs_name = flask.request.form.get("input_crs_name")
+    output_crs_authority = flask.request.form.get("output_crs_authority")
+    output_crs_code = flask.request.form.get("output_crs_code")
+    output_crs_name = flask.request.form.get("output_crs_name")
+
+    if geode_object is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No geode_object sent"}, 400
+        )
+    if id is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No id sent"}, 400
+        )
+    if filename is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No filename sent"}, 400
+        )
+    if input_crs_authority is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_crs_authority sent"}, 400
+        )
+    if input_crs_code is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_crs_code sent"}, 400
+        )
+    if input_crs_name is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_crs_name sent"}, 400
+        )
+    if output_crs_authority is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_crs_authority sent"}, 400
+        )
+    if output_crs_code is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_crs_code sent"}, 400
+        )
+    if output_crs_name is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_crs_name sent"}, 400
+        )
+
+    input_crs = {
+        "authority": input_crs_authority,
+        "code": input_crs_code,
+        "name": input_crs_name,
+    }
+
+    output_crs = {
+        "authority": output_crs_authority,
+        "code": output_crs_code,
+        "name": output_crs_name,
+    }
+
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    data = geode_objects.objects_list()[geode_object]["load"](file_path)
+
+    functions.asign_geographic_coordinate_system_info(geode_object, data, input_crs)
+    functions.convert_geographic_coordinate_system_info(geode_object, data, output_crs)
+
+    geode_objects.objects_list()[geode_object]["save"](
+        data, os.path.join(UPLOAD_FOLDER, filename)
+    )
+    geode_objects.objects_list()[geode_object]["save_viewable"](
+        data, os.path.join(UPLOAD_FOLDER, id)
+    )
+
+    return flask.make_response({"message": "files regenerated"}, 200)

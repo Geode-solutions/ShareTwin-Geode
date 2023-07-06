@@ -6,6 +6,8 @@ import werkzeug
 import flask
 import uuid
 
+import opengeode_geosciences as og_gs
+
 
 def list_objects_input_extensions(
     is_viewable: bool = True,
