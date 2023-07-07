@@ -186,7 +186,7 @@ def get_coordinate_system(geode_object, coordinate_system):
     )
 
 
-def asign_geographic_coordinate_system_info(geode_object, data, input_crs):
+def assign_geographic_coordinate_system_info(geode_object, data, input_crs):
     builder = get_builder(geode_object, data)
     info = get_geographic_coordinate_systems_info(geode_object, input_crs)
     geode_objects.objects_list()[geode_object]["crs"]["assign"](
