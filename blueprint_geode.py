@@ -230,7 +230,7 @@ def coordinate_systems():
         return flask.make_response({"error_message": str(e)}, 500)
 
 
-@geode_routes.route("/asign_geographic_coordinate_system", methods=["POST"])
+@geode_routes.route("/assign_geographic_coordinate_system", methods=["POST"])
 def asign_geographic_coordinate_system():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
     geode_object = flask.request.form.get("geode_object")
