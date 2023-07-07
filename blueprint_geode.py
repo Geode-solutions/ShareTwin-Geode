@@ -455,8 +455,8 @@ def create_coordinate_system():
         "origin_y": float(input_origin_y),
         "point_1_x": float(input_point_1_x),
         "point_1_y": float(input_point_1_y),
-        "point_2": float(input_point_2_x),
-        "point_2": float(input_point_2_y),
+        "point_2_x": float(input_point_2_x),
+        "point_2_y": float(input_point_2_y),
     }
 
     output_coordinate_points = {
@@ -464,8 +464,8 @@ def create_coordinate_system():
         "origin_y": float(output_origin_y),
         "point_1_x": float(output_point_1_x),
         "point_1_y": float(output_point_1_y),
-        "point_2": float(output_point_2_x),
-        "point_2": float(output_point_2_y),
+        "point_2_x": float(output_point_2_x),
+        "point_2_y": float(output_point_2_y),
     }
 
     file_path = os.path.join(UPLOAD_FOLDER, filename)
