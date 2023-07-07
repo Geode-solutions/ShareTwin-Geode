@@ -364,7 +364,7 @@ def convert_geographic_coordinate_system():
     return flask.make_response({"message": "files regenerated"}, 200)
 
 
-@geode_routes.route("/create_coordinate_system", methods=["POST"])
+@geode_routes.route("/georeference", methods=["POST"])
 def create_coordinate_system():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
     geode_object = flask.request.form.get("geode_object")
