@@ -365,7 +365,7 @@ def convert_geographic_coordinate_system():
 
 
 @geode_routes.route("/georeference", methods=["POST"])
-def create_coordinate_system():
+def georeference():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
     geode_object = flask.request.form.get("geode_object")
     id = flask.request.form.get("id")
