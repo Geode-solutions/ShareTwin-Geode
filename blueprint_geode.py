@@ -362,3 +362,128 @@ def convert_geographic_coordinate_system():
     )
 
     return flask.make_response({"message": "files regenerated"}, 200)
+
+
+@geode_routes.route("/create_coordinate_system", methods=["POST"])
+def create_coordinate_system():
+    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
+    geode_object = flask.request.form.get("geode_object")
+    id = flask.request.form.get("id")
+    filename = flask.request.form.get("filename")
+    coordinate_system_name = flask.request.form.get("coordinate_system_name")
+    input_origin_x = flask.request.form.get("input_origin_x")
+    input_origin_y = flask.request.form.get("input_origin_y")
+    input_point_1_x = flask.request.form.get("input_point_1_x")
+    input_point_1_y = flask.request.form.get("input_point_1_y")
+    input_point_2_x = flask.request.form.get("input_point_2_x")
+    input_point_2_y = flask.request.form.get("input_point_2_y")
+    output_origin_x = flask.request.form.get("output_origin_x")
+    output_origin_y = flask.request.form.get("output_origin_y")
+    output_point_1_x = flask.request.form.get("output_point_1_x")
+    output_point_1_y = flask.request.form.get("output_point_1_y")
+    output_point_2_x = flask.request.form.get("output_point_2_x")
+    output_point_2_y = flask.request.form.get("output_point_2_y")
+
+    if geode_object is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No geode_object sent"}, 400
+        )
+    if id is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No id sent"}, 400
+        )
+    if filename is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No filename sent"}, 400
+        )
+    if coordinate_system_name is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No coordinate_system_name sent"},
+            400,
+        )
+    if input_origin_x is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_origin_x sent"}, 400
+        )
+    if input_origin_y is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_origin_y sent"}, 400
+        )
+    if input_point_1_x is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_point_1_x sent"}, 400
+        )
+    if input_point_1_y is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_point_1_x sent"}, 400
+        )
+    if input_point_2_x is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_point_2_x sent"}, 400
+        )
+    if input_point_2_y is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No input_point_2_y sent"}, 400
+        )
+    if output_origin_x is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_origin_x sent"}, 400
+        )
+    if output_origin_y is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_origin_y sent"}, 400
+        )
+    if output_point_1_x is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_point_1_x sent"}, 400
+        )
+    if output_point_1_y is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_point_1_y sent"}, 400
+        )
+    if output_point_2_x is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_point_2_x sent"}, 400
+        )
+    if output_point_2_y is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No output_point_2_y sent"}, 400
+        )
+
+    input_coordinate_points = {
+        "origin_x": float(input_origin_x),
+        "origin_y": float(input_origin_y),
+        "point_1_x": float(input_point_1_x),
+        "point_1_y": float(input_point_1_y),
+        "point_2": float(input_point_2_x),
+        "point_2": float(input_point_2_y),
+    }
+
+    output_coordinate_points = {
+        "origin_x": float(output_origin_x),
+        "origin_y": float(output_origin_y),
+        "point_1_x": float(output_point_1_x),
+        "point_1_y": float(output_point_1_y),
+        "point_2": float(output_point_2_x),
+        "point_2": float(output_point_2_y),
+    }
+
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    data = geode_objects.objects_list()[geode_object]["load"](file_path)
+
+    functions.create_coordinate_system(
+        geode_object,
+        data,
+        coordinate_system_name,
+        input_coordinate_points,
+        output_coordinate_points,
+    )
+
+    geode_objects.objects_list()[geode_object]["save"](
+        data, os.path.join(UPLOAD_FOLDER, filename)
+    )
+    geode_objects.objects_list()[geode_object]["save_viewable"](
+        data, os.path.join(UPLOAD_FOLDER, id)
+    )
+
+    return flask.make_response({"message": "files regenerated"}, 200)

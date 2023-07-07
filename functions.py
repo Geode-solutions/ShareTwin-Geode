@@ -7,6 +7,7 @@ import flask
 import uuid
 
 import opengeode_geosciences as og_gs
+import opengeode as og
 
 
 def list_objects_input_extensions(
@@ -161,6 +162,30 @@ def get_geographic_coordinate_systems_info(geode_object, crs):
         )
 
 
+def get_coordinate_system(geode_object, coordinate_system):
+    return og.CoordinateSystem2D(
+        [
+            og.Vector2D(
+                og.Point2D(
+                    [coordinate_system["origin_x"], coordinate_system["origin_y"]]
+                ),
+                og.Point2D(
+                    [coordinate_system["point_1_x"], coordinate_system["point_1_y"]]
+                ),
+            ),
+            og.Vector2D(
+                og.Point2D(
+                    [coordinate_system["origin_x"], coordinate_system["origin_y"]]
+                ),
+                og.Point2D(
+                    [coordinate_system["point_2_x"], coordinate_system["point_2_y"]]
+                ),
+            ),
+        ],
+        og.Point2D([coordinate_system["origin_x"], coordinate_system["origin_y"]]),
+    )
+
+
 def asign_geographic_coordinate_system_info(geode_object, data, input_crs):
     builder = get_builder(geode_object, data)
     info = get_geographic_coordinate_systems_info(geode_object, input_crs)
@@ -174,4 +199,19 @@ def convert_geographic_coordinate_system_info(geode_object, data, output_crs):
     info = get_geographic_coordinate_systems_info(geode_object, output_crs)
     geode_objects.objects_list()[geode_object]["crs"]["convert"](
         data, builder, output_crs["name"], info
+    )
+
+
+def create_coordinate_system(
+    geode_object, data, name, input_coordinate_points, output_coordinate_points
+):
+    builder = get_builder(geode_object, data)
+    input_coordiante_system = get_coordinate_system(
+        geode_object, input_coordinate_points
+    )
+    output_coordiante_system = get_coordinate_system(
+        geode_object, output_coordinate_points
+    )
+    geode_objects.objects_list()[geode_object]["crs"]["create"](
+        data, builder, name, input_coordiante_system, output_coordiante_system
     )
