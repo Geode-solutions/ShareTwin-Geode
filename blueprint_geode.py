@@ -184,6 +184,27 @@ def texture_coordinates():
         return flask.make_response({"error_message": str(e)}, 500)
 
 
+@geode_routes.route("/geographic_coordinate_systems", methods=["GET"])
+def crs_converter_geographic_coordinate_systems():
+    geode_object = flask.request.form.get("geode_object")
+    if geode_object is None:
+        return flask.make_response({"error_message": "No geode_object sent"}, 400)
+
+    print(f"{geode_object=}")
+
+    infos = functions.get_geographic_coordinate_systems(geode_object)
+    crs_list = []
+
+    for info in infos:
+        crs = {}
+        crs["name"] = info.name
+        crs["code"] = info.code
+        crs["authority"] = info.authority
+        crs_list.append(crs)
+
+    return flask.make_response({"crs_list": crs_list}, 200)
+
+
 @geode_routes.route("/coordinate_systems", methods=["POST"])
 def coordinate_systems():
     try:
@@ -231,7 +252,7 @@ def coordinate_systems():
 
 
 @geode_routes.route("/assign_geographic_coordinate_system", methods=["POST"])
-def asign_geographic_coordinate_system():
+def assign_geographic_coordinate_system():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
     geode_object = flask.request.form.get("geode_object")
     id = flask.request.form.get("id")
@@ -274,7 +295,7 @@ def asign_geographic_coordinate_system():
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     data = geode_objects.objects_list()[geode_object]["load"](file_path)
 
-    functions.asign_geographic_coordinate_system_info(geode_object, data, input_crs)
+    functions.assign_geographic_coordinate_system_info(geode_object, data, input_crs)
 
     geode_objects.objects_list()[geode_object]["save"](
         data, os.path.join(UPLOAD_FOLDER, filename)
@@ -351,7 +372,7 @@ def convert_geographic_coordinate_system():
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     data = geode_objects.objects_list()[geode_object]["load"](file_path)
 
-    functions.asign_geographic_coordinate_system_info(geode_object, data, input_crs)
+    functions.assign_geographic_coordinate_system_info(geode_object, data, input_crs)
     functions.convert_geographic_coordinate_system_info(geode_object, data, output_crs)
 
     geode_objects.objects_list()[geode_object]["save"](
