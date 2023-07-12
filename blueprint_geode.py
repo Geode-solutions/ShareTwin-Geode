@@ -184,7 +184,7 @@ def texture_coordinates():
         return flask.make_response({"error_message": str(e)}, 500)
 
 
-@geode_routes.route("/geographic_coordinate_systems", methods=["GET"])
+@geode_routes.route("/geographic_coordinate_systems", methods=["POST"])
 def crs_converter_geographic_coordinate_systems():
     geode_object = flask.request.form.get("geode_object")
     if geode_object is None:
