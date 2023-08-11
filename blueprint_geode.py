@@ -1,11 +1,14 @@
+# Standard library imports
+import os
+import shutil
+import uuid
+
+# Third party imports
 import flask
 import flask_cors
-import os
-import functions
 import werkzeug
-import geode_objects
-import uuid
-import shutil
+
+from opengeodeweb_back import geode_geode_functions
 
 import opengeode_geosciences as og_gs
 
@@ -15,12 +18,12 @@ flask_cors.CORS(geode_routes)
 
 @geode_routes.before_request
 def before_request():
-    functions.create_lock_file()
+    geode_functions.create_lock_file()
 
 
 @geode_routes.teardown_request
 def teardown_request(exception):
-    functions.remove_lock_file()
+    geode_functions.remove_lock_file()
 
 
 @geode_routes.route("/", methods=["GET"])
@@ -40,28 +43,30 @@ def healthcheck():
 
 @geode_routes.route("/allowed_files", methods=["GET"])
 def allowed_files():
-    extensions = functions.list_objects_input_extensions(True)
+    extensions = geode_functions.list_objects_input_extensions(True)
     return {"status": 200, "extensions": extensions}
 
 
 @geode_routes.route("/object_allowed_files", methods=["POST"])
 def object_allowed_files():
-    geode_object = flask.request.form.get("geode_object")
-    if geode_object is None:
-        return flask.make_response({"error_message": "No geode_object sent"}, 400)
-    extensions = functions.list_objects_input_extensions(False, geode_object)
+    array_variables = ["geode_object"]
+    variables_dict = geode_functions.get_form_variables(
+        flask.request.form, array_variables
+    )
+    extensions = geode_functions.list_objects_input_extensions(
+        False, array_variables["geode_object"]
+    )
     return {"status": 200, "extensions": extensions}
 
 
 @geode_routes.route("/allowed_objects", methods=["POST"])
 def allowed_objects():
-    filename = flask.request.form.get("filename")
-    print(f"{filename=}", flush=True)
-    if filename is None:
-        return flask.make_response({"error_message": "No file sent"}, 400)
-    file_extension = os.path.splitext(filename)[1][1:]
-    allowed_objects = functions.list_objects(file_extension)
-    print(f"{allowed_objects=}", flush=True)
+    array_variables = ["filename"]
+    variables_dict = geode_functions.get_form_variables(
+        flask.request.form, array_variables
+    )
+    file_extension = os.path.splitext(array_variables["filename"])[1][1:]
+    allowed_objects = geode_functions.list_objects(file_extension)
     return flask.make_response({"allowed_objects": allowed_objects}, 200)
 
 
@@ -80,31 +85,24 @@ def ping():
 def convert_file():
     try:
         UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-        object_type = flask.request.form.get("object_type")
-        file = flask.request.form.get("file")
-        old_file_name = flask.request.form.get("old_file_name")
-        file_size = flask.request.form.get("file_size")
-
-        if object_type is None:
-            return flask.make_response({"error_message": "No object_type sent"}, 400)
-        if file is None:
-            return flask.make_response({"error_message": "No file sent"}, 400)
-        if old_file_name is None:
-            return flask.make_response({"error_message": "No old_file_name sent"}, 400)
-        if file_size is None:
-            return flask.make_response({"error_message": "No file_size sent"}, 400)
+        # CHANGE geode_object
+        array_variables = ["geode_object", "file", "old_file_name", "file_size"]
+        variables_dict = geode_functions.get_form_variables(
+            flask.request.form, array_variables
+        )
 
         secure_file_name = werkzeug.utils.secure_filename(old_file_name)
         file_path = os.path.join(UPLOAD_FOLDER, secure_file_name)
         id = str(uuid.uuid4()).replace("-", "")
 
-        uploaded_file = functions.upload_file(
-            file, secure_file_name, UPLOAD_FOLDER, file_size
+        uploaded_file = geode_functions.upload_file(
+            array_variables["file"],
+            secure_file_name,
+            UPLOAD_FOLDER,
+            array_variables["file_size"],
         )
-        if not uploaded_file:
-            flask.make_response({"error_message": "File not uploaded"}, 500)
 
-        data = geode_objects.objects_list()[object_type]["load"](file_path)
+        data = geode_functions.load(variables_dict["geode_object"], file_path)
 
         if geode_objects.objects_list()[object_type]["is_viewable"]:
             name = data.name()
@@ -116,11 +114,11 @@ def convert_file():
         viewable_file_path = os.path.join(UPLOAD_FOLDER, id)
         native_file_path = os.path.join(UPLOAD_FOLDER, id + "." + native_extension)
 
-        saved_viewable_file_path = functions.geode_objects.objects_list()[object_type][
-            "save_viewable"
-        ](data, viewable_file_path)
+        saved_viewable_file_path = geode_functions.geode_objects.objects_list()[
+            object_type
+        ]["save_viewable"](data, viewable_file_path)
         print("Saved viewable", flush=True)
-        functions.geode_objects.objects_list()[object_type]["save"](
+        geode_functions.geode_objects.objects_list()[object_type]["save"](
             data, native_file_path
         )
         print("Saved native", flush=True)
@@ -164,18 +162,15 @@ def delete_all_files():
 def texture_coordinates():
     try:
         UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-        native_file_name = flask.request.form.get("native_file_name")
-        geode_object = flask.request.form.get("geode_object")
+        array_variables = ["geode_object", "native_file_name"]
+        variables_dict = geode_functions.get_form_variables(
+            flask.request.form, array_variables
+        )
 
-        if geode_object is None:
-            return flask.make_response({"error_message": "No geode_object sent"}, 400)
-        if native_file_name is None:
-            return flask.make_response(
-                {"error_message": "No native_file_name sent"}, 400
-            )
-
-        native_file_path = os.path.join(UPLOAD_FOLDER, native_file_name)
-        data = geode_objects.objects_list()[geode_object]["load"](native_file_path)
+        native_file_path = os.path.join(
+            UPLOAD_FOLDER, variables_dict["native_file_name"]
+        )
+        data = geode_functions.load(variables_dict["geode_object"], native_file_path)
         texture_coordinates = data.texture_manager().texture_names()
 
         return flask.make_response({"texture_coordinates": texture_coordinates}, 200)
@@ -186,13 +181,14 @@ def texture_coordinates():
 
 @geode_routes.route("/geographic_coordinate_systems", methods=["GET"])
 def crs_converter_geographic_coordinate_systems():
-    geode_object = flask.request.form.get("geode_object")
-    if geode_object is None:
-        return flask.make_response({"error_message": "No geode_object sent"}, 400)
-
-    print(f"{geode_object=}")
-
-    infos = functions.get_geographic_coordinate_systems(geode_object)
+    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
+    array_variables = ["geode_object"]
+    variables_dict = geode_functions.get_form_variables(
+        flask.request.form, array_variables
+    )
+    infos = geode_functions.get_geographic_coordinate_systems(
+        variables_dict["geode_object"]
+    )
     crs_list = []
 
     for info in infos:
@@ -201,7 +197,6 @@ def crs_converter_geographic_coordinate_systems():
         crs["code"] = info.code
         crs["authority"] = info.authority
         crs_list.append(crs)
-
     return flask.make_response({"crs_list": crs_list}, 200)
 
 
@@ -209,18 +204,15 @@ def crs_converter_geographic_coordinate_systems():
 def coordinate_systems():
     try:
         UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-        native_file_name = flask.request.form.get("native_file_name")
-        geode_object = flask.request.form.get("geode_object")
+        array_variables = ["geode_object", "native_file_name"]
+        variables_dict = geode_functions.get_form_variables(
+            flask.request.form, array_variables
+        )
 
-        if geode_object is None:
-            return flask.make_response({"error_message": "No geode_object sent"}, 400)
-        if native_file_name is None:
-            return flask.make_response(
-                {"error_message": "No native_file_name sent"}, 400
-            )
-
-        native_file_path = os.path.join(UPLOAD_FOLDER, native_file_name)
-        data = geode_objects.objects_list()[geode_object]["load"](native_file_path)
+        native_file_path = os.path.join(
+            UPLOAD_FOLDER, variables_dict["native_file_name"]
+        )
+        data = geode_functions.load(variables_dict["geode_object"], native_file_path)
         list_coordinate_systems = (
             data.main_coordinate_reference_system_manager().coordinate_reference_system_names()
         )
@@ -254,257 +246,141 @@ def coordinate_systems():
 @geode_routes.route("/assign_geographic_coordinate_system", methods=["POST"])
 def assign_geographic_coordinate_system():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-    geode_object = flask.request.form.get("geode_object")
-    id = flask.request.form.get("id")
-    filename = flask.request.form.get("filename")
-    crs_authority = flask.request.form.get("crs_authority")
-    crs_code = flask.request.form.get("crs_code")
-    crs_name = flask.request.form.get("crs_name")
-
-    if geode_object is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No geode_object sent"}, 400
-        )
-    if id is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No id sent"}, 400
-        )
-    if filename is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No filename sent"}, 400
-        )
-    if crs_authority is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No crs_authority sent"}, 400
-        )
-    if crs_code is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No crs_code sent"}, 400
-        )
-    if crs_name is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No crs_name sent"}, 400
-        )
+    array_variables = [
+        "geode_object",
+        "id",
+        "filename",
+        "crs_authority",
+        "crs_code",
+        "crs_name",
+    ]
+    variables_dict = geode_functions.get_form_variables(
+        flask.request.form, array_variables
+    )
 
     input_crs = {
-        "authority": crs_authority,
-        "code": crs_code,
-        "name": crs_name,
+        "authority": variables_dict["crs_authority"],
+        "code": variables_dict["crs_code"],
+        "name": variables_dict["crs_name"],
     }
 
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    data = geode_objects.objects_list()[geode_object]["load"](file_path)
+    file_path = os.path.join(UPLOAD_FOLDER, variables_dict["filename"])
+    data = geode_functions.load(variables_dict["geode_object"], file_path)
 
-    functions.assign_geographic_coordinate_system_info(geode_object, data, input_crs)
-
-    geode_objects.objects_list()[geode_object]["save"](
-        data, os.path.join(UPLOAD_FOLDER, filename)
-    )
-    geode_objects.objects_list()[geode_object]["save_viewable"](
-        data, os.path.join(UPLOAD_FOLDER, id)
+    geode_functions.assign_geographic_coordinate_system_info(
+        variables_dict["geode_object"], data, input_crs
     )
 
-    return flask.make_response({"message": "files regenerated"}, 200)
+    geode_functions.save(data, os.path.join(UPLOAD_FOLDER, filename))
+    geode_functions.save_viewable(data, os.path.join(UPLOAD_FOLDER, id))
+
+    return flask.make_response({}, 200)
 
 
 @geode_routes.route("/convert_geographic_coordinate_system", methods=["POST"])
 def convert_geographic_coordinate_system():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-    geode_object = flask.request.form.get("geode_object")
-    id = flask.request.form.get("id")
-    filename = flask.request.form.get("filename")
-    input_crs_authority = flask.request.form.get("input_crs_authority")
-    input_crs_code = flask.request.form.get("input_crs_code")
-    input_crs_name = flask.request.form.get("input_crs_name")
-    output_crs_authority = flask.request.form.get("output_crs_authority")
-    output_crs_code = flask.request.form.get("output_crs_code")
-    output_crs_name = flask.request.form.get("output_crs_name")
 
-    if geode_object is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No geode_object sent"}, 400
-        )
-    if id is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No id sent"}, 400
-        )
-    if filename is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No filename sent"}, 400
-        )
-    if input_crs_authority is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_crs_authority sent"}, 400
-        )
-    if input_crs_code is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_crs_code sent"}, 400
-        )
-    if input_crs_name is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_crs_name sent"}, 400
-        )
-    if output_crs_authority is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_crs_authority sent"}, 400
-        )
-    if output_crs_code is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_crs_code sent"}, 400
-        )
-    if output_crs_name is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_crs_name sent"}, 400
-        )
+    array_variables = [
+        "geode_object",
+        "id",
+        "filename",
+        "input_crs_authority",
+        "input_crs_code",
+        "input_crs_name",
+        "output_crs_authority",
+        "output_crs_code",
+        "output_crs_name",
+    ]
+    variables_dict = geode_functions.get_form_variables(
+        flask.request.form, array_variables
+    )
 
     input_crs = {
-        "authority": input_crs_authority,
-        "code": input_crs_code,
-        "name": input_crs_name,
+        "authority": variables_dict["input_crs_authority"],
+        "code": variables_dict["input_crs_code"],
+        "name": variables_dict["input_crs_name"],
     }
 
     output_crs = {
-        "authority": output_crs_authority,
-        "code": output_crs_code,
-        "name": output_crs_name,
+        "authority": variables_dict["output_crs_authority"],
+        "code": variables_dict["output_crs_code"],
+        "name": variables_dict["output_crs_name"],
     }
 
     file_path = os.path.join(UPLOAD_FOLDER, filename)
-    data = geode_objects.objects_list()[geode_object]["load"](file_path)
+    data = geode_functions.load(variables_dict["geode_object"], file_path)
 
-    functions.assign_geographic_coordinate_system_info(geode_object, data, input_crs)
-    functions.convert_geographic_coordinate_system_info(geode_object, data, output_crs)
-
-    geode_objects.objects_list()[geode_object]["save"](
-        data, os.path.join(UPLOAD_FOLDER, filename)
+    geode_functions.assign_geographic_coordinate_system_info(
+        variables_dict["geode_object"], data, input_crs
     )
-    geode_objects.objects_list()[geode_object]["save_viewable"](
-        data, os.path.join(UPLOAD_FOLDER, id)
+    geode_functions.convert_geographic_coordinate_system_info(
+        variables_dict["geode_object"], data, output_crs
     )
 
-    return flask.make_response({"message": "files regenerated"}, 200)
+    geode_functions.save(data, os.path.join(UPLOAD_FOLDER, filename))
+    geode_functions.save_viewable(data, os.path.join(UPLOAD_FOLDER, id))
+
+    return flask.make_response({}, 200)
 
 
 @geode_routes.route("/georeference", methods=["POST"])
 def georeference():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-    geode_object = flask.request.form.get("geode_object")
-    id = flask.request.form.get("id")
-    filename = flask.request.form.get("filename")
-    coordinate_system_name = flask.request.form.get("coordinate_system_name")
-    input_origin_x = flask.request.form.get("input_origin_x")
-    input_origin_y = flask.request.form.get("input_origin_y")
-    input_point_1_x = flask.request.form.get("input_point_1_x")
-    input_point_1_y = flask.request.form.get("input_point_1_y")
-    input_point_2_x = flask.request.form.get("input_point_2_x")
-    input_point_2_y = flask.request.form.get("input_point_2_y")
-    output_origin_x = flask.request.form.get("output_origin_x")
-    output_origin_y = flask.request.form.get("output_origin_y")
-    output_point_1_x = flask.request.form.get("output_point_1_x")
-    output_point_1_y = flask.request.form.get("output_point_1_y")
-    output_point_2_x = flask.request.form.get("output_point_2_x")
-    output_point_2_y = flask.request.form.get("output_point_2_y")
 
-    if geode_object is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No geode_object sent"}, 400
-        )
-    if id is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No id sent"}, 400
-        )
-    if filename is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No filename sent"}, 400
-        )
-    if coordinate_system_name is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No coordinate_system_name sent"},
-            400,
-        )
-    if input_origin_x is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_origin_x sent"}, 400
-        )
-    if input_origin_y is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_origin_y sent"}, 400
-        )
-    if input_point_1_x is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_point_1_x sent"}, 400
-        )
-    if input_point_1_y is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_point_1_x sent"}, 400
-        )
-    if input_point_2_x is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_point_2_x sent"}, 400
-        )
-    if input_point_2_y is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No input_point_2_y sent"}, 400
-        )
-    if output_origin_x is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_origin_x sent"}, 400
-        )
-    if output_origin_y is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_origin_y sent"}, 400
-        )
-    if output_point_1_x is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_point_1_x sent"}, 400
-        )
-    if output_point_1_y is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_point_1_y sent"}, 400
-        )
-    if output_point_2_x is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_point_2_x sent"}, 400
-        )
-    if output_point_2_y is None:
-        return flask.make_response(
-            {"name": "Bad Request", "description": "No output_point_2_y sent"}, 400
-        )
+    array_variables = [
+        "geode_object",
+        "id",
+        "filename",
+        "coordinate_system_name",
+        "input_origin_x",
+        "input_origin_y",
+        "input_point_1_x",
+        "input_point_1_y",
+        "input_point_2_x",
+        "input_point_2_y",
+        "output_origin_x",
+        "output_origin_y",
+        "output_point_1_x",
+        "output_point_1_y",
+        "output_point_2_x",
+        "output_point_2_y",
+    ]
+    variables_dict = geode_functions.get_form_variables(
+        flask.request.form, array_variables
+    )
 
     input_coordinate_points = {
-        "origin_x": float(input_origin_x),
-        "origin_y": float(input_origin_y),
-        "point_1_x": float(input_point_1_x),
-        "point_1_y": float(input_point_1_y),
-        "point_2_x": float(input_point_2_x),
-        "point_2_y": float(input_point_2_y),
+        "origin_x": float(variables_dict["input_origin_x"]),
+        "origin_y": float(variables_dict["input_origin_y"]),
+        "point_1_x": float(variables_dict["input_point_1_x"]),
+        "point_1_y": float(variables_dict["input_point_1_y"]),
+        "point_2_x": float(variables_dict["input_point_2_x"]),
+        "point_2_y": float(variables_dict["input_point_2_y"]),
     }
 
     output_coordinate_points = {
-        "origin_x": float(output_origin_x),
-        "origin_y": float(output_origin_y),
-        "point_1_x": float(output_point_1_x),
-        "point_1_y": float(output_point_1_y),
-        "point_2_x": float(output_point_2_x),
-        "point_2_y": float(output_point_2_y),
+        "origin_x": float(variables_dict["output_origin_x"]),
+        "origin_y": float(variables_dict["output_origin_y"]),
+        "point_1_x": float(variables_dict["output_point_1_x"]),
+        "point_1_y": float(variables_dict["output_point_1_y"]),
+        "point_2_x": float(variables_dict["output_point_2_x"]),
+        "point_2_y": float(variables_dict["output_point_2_y"]),
     }
 
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    data = geode_objects.objects_list()[geode_object]["load"](file_path)
+    data = geode_functions.load(variables_dict["geode_object"], file_path)
 
-    functions.create_coordinate_system(
-        geode_object,
+    geode_functions.create_coordinate_system(
+        variables_dict["geode_object"],
         data,
-        coordinate_system_name,
+        variables_dict["coordinate_system_name"],
         input_coordinate_points,
         output_coordinate_points,
     )
 
-    geode_objects.objects_list()[geode_object]["save"](
-        data, os.path.join(UPLOAD_FOLDER, filename)
-    )
-    geode_objects.objects_list()[geode_object]["save_viewable"](
-        data, os.path.join(UPLOAD_FOLDER, id)
+    geode_functions.save(data, os.path.join(UPLOAD_FOLDER, variables_dict["filename"]))
+    geode_functions.save_viewable(
+        data, os.path.join(UPLOAD_FOLDER, variables_dict["id"])
     )
 
-    return flask.make_response({"message": "files regenerated"}, 200)
+    return flask.make_response({}, 200)
