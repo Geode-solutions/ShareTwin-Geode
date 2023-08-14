@@ -4,7 +4,7 @@ ID = os.environ.get("ID")
 
 
 def test_root(client):
-    response = client.get(f"/{ID}/healthcheck")
+    response = client.get("/healthcheck")
     assert response.status_code == 200
 
 
@@ -16,5 +16,5 @@ def test_createbackend(client):
 
 
 def test_ping(client):
-    response = client.post(f"/{ID}/ping")
+    response = client.post("/ping")
     assert response.status_code == 200

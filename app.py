@@ -6,6 +6,7 @@ import threading
 # Third party imports
 import flask
 import flask_cors
+from werkzeug.exceptions import HTTPException
 
 
 # Local application imports
@@ -45,7 +46,7 @@ def kill():
 FLASK_DEBUG = True if os.environ.get("FLASK_DEBUG", default=None) == "True" else False
 
 
-PORT = int(app.config.get("PORT"))
+PORT = app.config.get("PORT")
 CORS_HEADERS = app.config.get("CORS_HEADERS")
 UPLOAD_FOLDER = app.config.get("UPLOAD_FOLDER")
 LOCK_FOLDER = app.config.get("LOCK_FOLDER")
@@ -53,10 +54,10 @@ ORIGINS = app.config.get("ORIGINS")
 SSL = app.config.get("SSL")
 
 
-app.register_blueprint(bp_ID.ID_routes, url_prefix=f"/{ID}", name="ID_blueprint")
-app.register_blueprint(
-    bp_geode.geode_routes, url_prefix=f"/{ID}/tools", name="geode_blueprint"
-)
+app.register_blueprint(bp_ID.ID_routes, name="ID_blueprint")
+# app.register_blueprint(
+#     bp_geode.geode_routes, url_prefix=f"/{ID}/tools", name="geode_blueprint"
+# )
 
 
 if FLASK_DEBUG == False:
@@ -79,11 +80,6 @@ def handle_exception(e):
     )
     response.content_type = "application/json"
     return response
-
-
-@geode_routes.route("/sharetwin/createbackend", methods=["POST", "OPTIONS"])
-def createbackend():
-    return flask.make_response({"ID": str("123456")}, 200)
 
 
 # ''' Main '''
