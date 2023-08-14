@@ -10,9 +10,8 @@ from werkzeug.exceptions import HTTPException
 
 
 # Local application imports
-import blueprint_ID as bp_ID
-
-# import blueprints.blueprint_geode as bp_geode
+from .blueprints import blueprint_ID
+from .blueprints import blueprint_share_twin
 
 if os.path.isfile("./.env"):
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -54,10 +53,12 @@ ORIGINS = app.config.get("ORIGINS")
 SSL = app.config.get("SSL")
 
 
-app.register_blueprint(bp_ID.ID_routes, name="ID_blueprint")
-# app.register_blueprint(
-#     bp_geode.geode_routes, url_prefix=f"/{ID}/tools", name="geode_blueprint"
-# )
+app.register_blueprint(blueprint_ID.ID_routes, name="blueprint_ID")
+app.register_blueprint(
+    blueprint_share_twin.geode_routes,
+    url_prefix="/share_twin",
+    name="blueprint_share_twin",
+)
 
 
 if FLASK_DEBUG == False:
