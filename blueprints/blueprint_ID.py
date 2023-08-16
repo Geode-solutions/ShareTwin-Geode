@@ -1,5 +1,7 @@
+# Standard library imports
 import os
 
+# Third party imports
 import flask
 import flask_cors
 
@@ -31,3 +33,17 @@ def ping():
 @ID_routes.route("/sharetwin/createbackend", methods=["POST", "OPTIONS"])
 def create_backend():
     return flask.make_response({"ID": str("123456")}, 200)
+
+
+@ID_routes.route("/delete_all_files", methods=["DELETE"])
+def delete_all_files():
+    UPLOAD_FOLDER = os.path.abspath(flask.current_app.config["UPLOAD_FOLDER"])
+    for filename in os.listdir(UPLOAD_FOLDER):
+        f = os.path.join(UPLOAD_FOLDER, filename)
+        if os.path.isfile(f):
+            print(f)
+            os.remove(f)
+        else:
+            shutil.rmtree(f)
+
+    return flask.make_response({}, 204)

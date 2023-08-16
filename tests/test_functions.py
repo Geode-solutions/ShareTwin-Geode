@@ -18,3 +18,8 @@ def test_createbackend(client):
 def test_ping(client):
     response = client.post("/ping")
     assert response.status_code == 200
+
+
+def test_delete_all_files(client):
+    response = client.delete("/delete_all_files")
+    assert response.status_code == 204

@@ -17,17 +17,21 @@ flask_cors.CORS(share_twin_routes)
 
 @share_twin_routes.before_request
 def before_request():
-    geode_functions.create_lock_file()
+    geode_functions.create_lock_file(
+        os.path.abspath(flask.current_app.config["LOCK_FOLDER"])
+    )
 
 
 @share_twin_routes.teardown_request
 def teardown_request(exception):
-    geode_functions.remove_lock_file()
+    geode_functions.remove_lock_file(
+        os.path.abspath(flask.current_app.config["LOCK_FOLDER"])
+    )
 
 
 @share_twin_routes.route("/allowed_files", methods=["GET"])
 def allowed_files():
-    extensions = geode_functions.list_objects_input_extensions(True)
+    extensions = geode_functions.list_input_extensions(["inspector"])
     return flask.make_response({"extensions": extensions}, 200)
 
 
@@ -66,7 +70,7 @@ def convert_file():
     )
 
     secure_file_name = werkzeug.utils.secure_filename(old_file_name)
-    file_path = os.path.join(UPLOAD_FOLDER, secure_file_name)
+    absolute_file_path = os.path.abspath(os.path.join(UPLOAD_FOLDER, secure_file_name))
     id = str(uuid.uuid4()).replace("-", "")
 
     uploaded_file = geode_functions.upload_file(
@@ -76,7 +80,7 @@ def convert_file():
         array_variables["file_size"],
     )
 
-    data = geode_functions.load(variables_dict["geode_object"], file_path)
+    data = geode_functions.load(variables_dict["geode_object"], absolute_file_path)
 
     if geode_objects.objects_list()[object_type]["is_viewable"]:
         name = data.name()
@@ -85,20 +89,22 @@ def convert_file():
 
     native_extension = data.native_extension()
 
-    viewable_file_path = os.path.join(UPLOAD_FOLDER, id)
-    native_file_path = os.path.join(UPLOAD_FOLDER, id + "." + native_extension)
+    absolute_viewable_file_path = absolute_file_path(os.path.join(UPLOAD_FOLDER, id))
+    absolute_native_file_path = absolute_file_path(
+        os.path.join(UPLOAD_FOLDER, id + "." + native_extension)
+    )
 
     saved_viewable_file_path = geode_functions.save_viewable(data, viewable_file_path)
     print("Saved viewable", flush=True)
     geode_functions.save(
         data,
         variables_dict["geode_object"],
-        native_file_path,
+        absolute_native_file_path,
         id + "." + native_extension,
     )
     print("Saved native", flush=True)
 
-    native_file_name = os.path.basename(native_file_path)
+    native_file_name = os.path.basename(absolute_native_file_path)
     viewable_file_name = os.path.basename(saved_viewable_file_path)
 
     return flask.make_response(
@@ -110,20 +116,6 @@ def convert_file():
         },
         200,
     )
-
-
-@share_twin_routes.route("/delete_all_files", methods=["DELETE"])
-def delete_all_files():
-    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
-    for filename in os.listdir(UPLOAD_FOLDER):
-        f = os.path.join(UPLOAD_FOLDER, filename)
-        if os.path.isfile(f):
-            print(f)
-            os.remove(f)
-        else:
-            shutil.rmtree(f)
-
-    return flask.make_response({"message": "deleted"}, 204)
 
 
 @share_twin_routes.route("/texture_coordinates", methods=["POST"])
