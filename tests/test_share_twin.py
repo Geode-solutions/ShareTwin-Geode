@@ -14,7 +14,7 @@ def test_allowed_files(client):
     assert response.status_code == 200
     extensions = response.json["extensions"]
     assert type(extensions) is list
-    for extension in list_extensions:
+    for extension in extensions:
         assert type(extension) == str
 
 
@@ -50,22 +50,22 @@ def test_allowed_objects(client):
     assert description == "No filename sent"
 
 
-# def test_geographic_coordinate_systems(client):
-#     route = f"{base_route}/geographic_coordinate_systems"
+def test_geographic_coordinate_systems(client):
+    route = f"{base_route}/geographic_coordinate_systems"
 
-#     # Normal test with geode_object 'BRep'
-#     response = client.post(route, data={"geode_object": "BRep"})
-#     assert response.status_code == 200
-#     crs_list = response.json["crs_list"]
-#     assert type(crs_list) is list
-#     for crs in crs_list:
-#         assert type(crs) is dict
+    # Normal test with geode_object 'BRep'
+    response = client.post(route, data={"geode_object": "BRep"})
+    assert response.status_code == 200
+    crs_list = response.json["crs_list"]
+    assert type(crs_list) is list
+    for crs in crs_list:
+        assert type(crs) is dict
 
-#     # Test without geode_object
-#     response = client.post(route)
-#     assert response.status_code == 400
-#     description = response.json["description"]
-#     assert description == "No geode_object sent"
+    # Test without geode_object
+    response = client.post(route)
+    assert response.status_code == 400
+    description = response.json["description"]
+    assert description == "No geode_object sent"
 
 
 # def test_output_file_extensions(client):

@@ -24,6 +24,7 @@ def before_request():
 
 @share_twin_routes.teardown_request
 def teardown_request(exception):
+    print(os.path.abspath(flask.current_app.config["LOCK_FOLDER"]))
     geode_functions.remove_lock_file(
         os.path.abspath(flask.current_app.config["LOCK_FOLDER"])
     )
@@ -42,7 +43,7 @@ def allowed_objects():
         flask.request.form, array_variables
     )
     file_extension = geode_functions.get_extension_from_filename(
-        array_variables["filename"]
+        variables_dict["filename"]
     )
     allowed_objects = geode_functions.list_objects(file_extension)
     return flask.make_response({"allowed_objects": allowed_objects}, 200)
@@ -51,9 +52,7 @@ def allowed_objects():
 @share_twin_routes.route("/object_allowed_files", methods=["POST"])
 def object_allowed_files():
     array_variables = ["geode_object"]
-    variables_dict = geode_functions.get_form_variables(
-        flask.request.form, array_variables
-    )
+    variables_dict = geode_functions.get_form_variables(flask.request, array_variables)
     extensions = geode_functions.list_objects_input_extensions(
         False, array_variables["geode_object"]
     )
