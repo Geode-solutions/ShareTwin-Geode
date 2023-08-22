@@ -56,8 +56,8 @@ else:
 
 PORT = app.config.get("PORT")
 CORS_HEADERS = app.config.get("CORS_HEADERS")
-UPLOAD_FOLDER = app.config.get("UPLOAD_FOLDER")
-LOCK_FOLDER = app.config.get("LOCK_FOLDER")
+UPLOAD_FOLDER = os.path.abspath(app.config.get("UPLOAD_FOLDER"))
+LOCK_FOLDER = os.path.abspath(app.config.get("LOCK_FOLDER"))
 ORIGINS = app.config.get("ORIGINS")
 SSL = app.config.get("SSL")
 
