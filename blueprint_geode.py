@@ -341,6 +341,39 @@ def convert_geographic_coordinate_system():
     return flask.make_response({"message": "files regenerated"}, 200)
 
 
+@geode_routes.route("/coordinate_reference_system_exists", methods=["POST"])
+def coordinate_system_name_exists():
+    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
+    geode_object = flask.request.form.get("geode_object")
+    filename = flask.request.form.get("filename")
+    coordinate_system_name = flask.request.form.get("coordinate_system_name")
+
+    if geode_object is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No geode_object sent"}, 400
+        )
+    if filename is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No filename sent"}, 400
+        )
+    if coordinate_system_name is None:
+        return flask.make_response(
+            {"name": "Bad Request", "description": "No coordinate_system_name sent"},
+            400,
+        )
+
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    data = geode_objects.objects_list()[geode_object]["load"](file_path)
+
+    coordinate_reference_system_exists = data.main_coordinate_reference_system_manager().coordinate_reference_system_exists(
+        coordinate_system_name
+    )
+
+    return flask.make_response(
+        {"coordinate_reference_system_exists": coordinate_reference_system_exists}, 200
+    )
+
+
 @geode_routes.route("/georeference", methods=["POST"])
 def georeference():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
