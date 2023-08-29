@@ -1,4 +1,5 @@
 # Standard library imports
+
 import os
 import dotenv
 import threading
@@ -7,7 +8,6 @@ import threading
 import flask
 import flask_cors
 from werkzeug.exceptions import HTTPException
-
 
 # Local application imports
 from blueprints import blueprint_ID
