@@ -59,18 +59,32 @@ app.register_blueprint(blueprint_geode.geode_routes)
 flask_cors.CORS(app, origins=ORIGINS)
 
 
-@app.errorhandler(HTTPException)
+@app.errorhandler(Exception)
 def handle_exception(e):
-    response = e.get_response()
-    response.data = flask.json.dumps(
-        {
-            "code": e.code,
-            "name": e.name,
-            "description": e.description,
-        }
-    )
-    response.content_type = "application/json"
-    return response
+    print(f"{e=}")
+
+    if isinstance(e, HTTPException):
+        print("instance of HTTPException")
+        response = e.get_response()
+        response.data = flask.json.dumps(
+            {
+                "code": e.code,
+                "name": e.name,
+                "description": e.description,
+            }
+        )
+        response.content_type = "application/json"
+        return response
+    else:
+        print("not instance of HTTPException")
+        return flask.make_response(
+            {
+                "code": 500,
+                "name": "Internal Server Error",
+                "description": str(e),
+            },
+            500,
+        )
 
 
 # ''' Main '''
