@@ -61,8 +61,6 @@ flask_cors.CORS(app, origins=ORIGINS)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    print(f"{e=}")
-
     if isinstance(e, HTTPException):
         print("instance of HTTPException")
         response = e.get_response()
