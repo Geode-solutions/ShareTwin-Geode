@@ -62,7 +62,6 @@ flask_cors.CORS(app, origins=ORIGINS)
 @app.errorhandler(Exception)
 def handle_exception(e):
     if isinstance(e, HTTPException):
-        print("instance of HTTPException")
         response = e.get_response()
         response.data = flask.json.dumps(
             {
@@ -74,7 +73,6 @@ def handle_exception(e):
         response.content_type = "application/json"
         return response
     else:
-        print("not instance of HTTPException")
         return flask.make_response(
             {
                 "code": 500,
