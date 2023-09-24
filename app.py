@@ -72,18 +72,28 @@ app.register_blueprint(
 )
 
 
-@app.errorhandler(HTTPException)
+@app.errorhandler(Exception)
 def handle_exception(e):
-    response = e.get_response()
-    response.data = flask.json.dumps(
-        {
-            "code": e.code,
-            "name": e.name,
-            "description": e.description,
-        }
-    )
-    response.content_type = "application/json"
-    return response
+    if isinstance(e, HTTPException):
+        response = e.get_response()
+        response.data = flask.json.dumps(
+            {
+                "code": e.code,
+                "name": e.name,
+                "description": e.description,
+            }
+        )
+        response.content_type = "application/json"
+        return response
+    else:
+        return flask.make_response(
+            {
+                "code": 500,
+                "name": "Internal Server Error",
+                "description": str(e),
+            },
+            500,
+        )
 
 
 # ''' Main '''
