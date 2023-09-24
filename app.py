@@ -1,5 +1,4 @@
 # Standard library imports
-
 import os
 import dotenv
 import threading
@@ -46,18 +45,16 @@ FLASK_DEBUG = True if os.environ.get("FLASK_DEBUG", default=None) == "True" else
 
 
 if FLASK_DEBUG == False:
-    print("DEBUG FALSE")
     app.config.from_object("config.ProdConfig")
     set_interval(kill, 150)
 else:
-    print("DEBUG TRUE")
     app.config.from_object("config.DevConfig")
 
 
 PORT = app.config.get("PORT")
 CORS_HEADERS = app.config.get("CORS_HEADERS")
-UPLOAD_FOLDER = os.path.abspath(app.config.get("UPLOAD_FOLDER"))
-LOCK_FOLDER = os.path.abspath(app.config.get("LOCK_FOLDER"))
+UPLOAD_FOLDER = app.config.get("UPLOAD_FOLDER")
+LOCK_FOLDER = app.config.get("LOCK_FOLDER")
 ORIGINS = app.config.get("ORIGINS")
 SSL = app.config.get("SSL")
 
@@ -67,23 +64,32 @@ flask_cors.CORS(app, origins=ORIGINS)
 app.register_blueprint(blueprint_ID.ID_routes, name="blueprint_ID")
 app.register_blueprint(
     blueprint_share_twin.share_twin_routes,
-    url_prefix="/share_twin",
     name="blueprint_share_twin",
 )
 
 
-@app.errorhandler(HTTPException)
+@app.errorhandler(Exception)
 def handle_exception(e):
-    response = e.get_response()
-    response.data = flask.json.dumps(
-        {
-            "code": e.code,
-            "name": e.name,
-            "description": e.description,
-        }
-    )
-    response.content_type = "application/json"
-    return response
+    if isinstance(e, HTTPException):
+        response = e.get_response()
+        response.data = flask.json.dumps(
+            {
+                "code": e.code,
+                "name": e.name,
+                "description": e.description,
+            }
+        )
+        response.content_type = "application/json"
+        return response
+    else:
+        return flask.make_response(
+            {
+                "code": 500,
+                "name": "Internal Server Error",
+                "description": str(e),
+            },
+            500,
+        )
 
 
 # ''' Main '''

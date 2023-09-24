@@ -37,7 +37,7 @@ def create_backend():
 
 @ID_routes.route("/delete_all_files", methods=["DELETE"])
 def delete_all_files():
-    UPLOAD_FOLDER = os.path.abspath(flask.current_app.config["UPLOAD_FOLDER"])
+    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
     for filename in os.listdir(UPLOAD_FOLDER):
         f = os.path.join(UPLOAD_FOLDER, filename)
         if os.path.isfile(f):

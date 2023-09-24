@@ -6,8 +6,8 @@ class Config(object):
     FLASK_DEBUG = os.environ.get("FLASK_DEBUG", default=False)
     PORT = "5000"
     CORS_HEADERS = "Content-Type"
-    UPLOAD_FOLDER = "/data"
-    LOCK_FOLDER = "./lock"
+    UPLOAD_FOLDER = os.path.abspath("/data")
+    LOCK_FOLDER = os.path.abspath("./lock")
 
 
 class ProdConfig(Config):

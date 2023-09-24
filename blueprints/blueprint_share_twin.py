@@ -64,15 +64,15 @@ def convert_file():
         flask.request.form, array_variables
     )
 
-    secure_file_name = werkzeug.utils.secure_filename(old_file_name)
+    secure_file_name = werkzeug.utils.secure_filename(variables_dict["old_file_name"])
     absolute_file_path = os.path.join(UPLOAD_FOLDER, secure_file_name)
     generated_id = str(uuid.uuid4()).replace("-", "")
 
     uploaded_file = geode_functions.upload_file(
-        array_variables["file"],
+        variables_dict["file"],
         secure_file_name,
         UPLOAD_FOLDER,
-        array_variables["file_size"],
+        variables_dict["file_size"],
     )
 
     data = geode_functions.load(variables_dict["geode_object"], absolute_file_path)
@@ -80,11 +80,11 @@ def convert_file():
     if geode_functions.is_viewable(variables_dict["geode_object"]):
         name = data.name()
     else:
-        name = old_file_name
+        name = variables_dict["old_file_name"]
 
     native_extension = data.native_extension()
 
-    absolute_viewable_file_path = os.path.join(UPLOAD_FOLDER, id)
+    absolute_viewable_file_path = os.path.join(UPLOAD_FOLDER, generated_id)
     absolute_native_file_path = os.path.join(
         UPLOAD_FOLDER, generated_id + "." + native_extension
     )
