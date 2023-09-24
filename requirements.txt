@@ -25,11 +25,7 @@ flask-cors==4.0.0
 geode-common==26.3.0
     # via geode-viewables
 geode-viewables==2.1.0
-<<<<<<< HEAD
     # via opengeodeweb-back
-=======
-    # via -r requirements.in
->>>>>>> 7a4feee0e9bf673151aa28812be314e3627c8d63
 importlib-metadata==6.8.0
     # via flask
 itsdangerous==2.1.2
@@ -47,15 +43,11 @@ opengeode-core==14.8.0
     #   opengeode-geosciencesio
     #   opengeode-inspector
     #   opengeode-io
-<<<<<<< HEAD
     #   opengeodeweb-back
-=======
->>>>>>> 7a4feee0e9bf673151aa28812be314e3627c8d63
 opengeode-geosciences==7.2.0
     # via
     #   geode-viewables
     #   opengeode-geosciencesio
-<<<<<<< HEAD
     #   opengeode-inspector
     #   opengeodeweb-back
 opengeode-geosciencesio==4.5.0
@@ -64,10 +56,6 @@ opengeode-geosciencesio==4.5.0
     #   opengeodeweb-back
 opengeode-inspector==3.1.0
     # via opengeodeweb-back
-=======
-opengeode-geosciencesio==4.5.0
-    # via -r requirements.in
->>>>>>> 7a4feee0e9bf673151aa28812be314e3627c8d63
 opengeode-io==6.2.0
     # via
     #   geode-viewables
