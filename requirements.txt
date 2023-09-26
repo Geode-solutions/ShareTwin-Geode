@@ -14,7 +14,7 @@ click==8.1.7
     # via flask
 colorama==0.4.6
     # via click
-cryptography==41.0.3
+cryptography==41.0.4
     # via -r requirements.in
 flask[async]==2.3.3
     # via
@@ -23,9 +23,11 @@ flask[async]==2.3.3
 flask-cors==4.0.0
     # via -r requirements.in
 geode-common==26.3.0
-    # via geode-viewables
+    # via
+    #   geode-viewables
+    #   opengeodeweb-back
 geode-viewables==2.1.0
-    # via -r requirements.in
+    # via opengeodeweb-back
 importlib-metadata==6.8.0
     # via flask
 itsdangerous==2.1.2
@@ -38,23 +40,32 @@ markupsafe==2.1.3
     #   werkzeug
 opengeode-core==14.8.0
     # via
-    #   -r requirements.in
     #   geode-common
     #   geode-viewables
     #   opengeode-geosciences
     #   opengeode-geosciencesio
+    #   opengeode-inspector
     #   opengeode-io
+    #   opengeodeweb-back
 opengeode-geosciences==7.2.0
     # via
-    #   -r requirements.in
     #   geode-viewables
     #   opengeode-geosciencesio
+    #   opengeode-inspector
+    #   opengeodeweb-back
 opengeode-geosciencesio==4.5.0
-    # via -r requirements.in
+    # via
+    #   opengeode-inspector
+    #   opengeodeweb-back
+opengeode-inspector==3.1.0
+    # via opengeodeweb-back
 opengeode-io==6.2.0
     # via
-    #   -r requirements.in
     #   geode-viewables
+    #   opengeode-inspector
+    #   opengeodeweb-back
+opengeodeweb-back==1.1.0
+    # via -r requirements.in
 pycparser==2.21
     # via cffi
 python-dotenv==1.0.0
