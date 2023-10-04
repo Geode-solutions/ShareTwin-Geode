@@ -1,6 +1,5 @@
 # Standard library imports
 import os
-import shutil
 import uuid
 
 # Third party imports
