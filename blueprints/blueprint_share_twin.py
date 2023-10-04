@@ -1,6 +1,5 @@
 # Standard library imports
 import os
-import shutil
 import uuid
 
 # Third party imports
@@ -84,7 +83,6 @@ def convert_file():
 
     native_extension = data.native_extension()
 
-    absolute_viewable_file_path = os.path.join(UPLOAD_FOLDER, generated_id)
     absolute_native_file_path = os.path.join(
         UPLOAD_FOLDER, generated_id + "." + native_extension
     )
@@ -128,7 +126,7 @@ def texture_coordinates():
     return flask.make_response({"texture_coordinates": texture_coordinates}, 200)
 
 
-@share_twin_routes.route("/geographic_coordinate_systems", methods=["GET"])
+@share_twin_routes.route("/geographic_coordinate_systems", methods=["POST"])
 def crs_converter_geographic_coordinate_systems():
     UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
     array_variables = ["geode_object"]
@@ -214,8 +212,15 @@ def assign_geographic_coordinate_system():
         variables_dict["geode_object"], data, input_crs
     )
 
-    geode_functions.save(data, os.path.join(UPLOAD_FOLDER, filename))
-    geode_functions.save_viewable(data, os.path.join(UPLOAD_FOLDER, id))
+    geode_functions.save(
+        variables_dict["geode_object"],
+        data,
+        UPLOAD_FOLDER,
+        variables_dict["filename"],
+    )
+    geode_functions.save_viewable(
+        variables_dict["geode_object"], data, UPLOAD_FOLDER, variables_dict["id"]
+    )
 
     return flask.make_response({}, 200)
 
@@ -228,9 +233,6 @@ def convert_geographic_coordinate_system():
         "geode_object",
         "id",
         "filename",
-        "input_crs_authority",
-        "input_crs_code",
-        "input_crs_name",
         "output_crs_authority",
         "output_crs_code",
         "output_crs_name",
@@ -239,32 +241,53 @@ def convert_geographic_coordinate_system():
         flask.request.form, array_variables
     )
 
-    input_crs = {
-        "authority": variables_dict["input_crs_authority"],
-        "code": variables_dict["input_crs_code"],
-        "name": variables_dict["input_crs_name"],
-    }
-
     output_crs = {
         "authority": variables_dict["output_crs_authority"],
         "code": variables_dict["output_crs_code"],
         "name": variables_dict["output_crs_name"],
     }
 
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    data = geode_functions.load(variables_dict["geode_object"], file_path)
+    absolute_file_path = os.path.join(UPLOAD_FOLDER, variables_dict["filename"])
+    data = geode_functions.load(variables_dict["geode_object"], absolute_file_path)
 
-    geode_functions.assign_geographic_coordinate_system_info(
-        variables_dict["geode_object"], data, input_crs
-    )
     geode_functions.convert_geographic_coordinate_system_info(
         variables_dict["geode_object"], data, output_crs
     )
 
-    geode_functions.save(data, os.path.join(UPLOAD_FOLDER, filename))
-    geode_functions.save_viewable(data, os.path.join(UPLOAD_FOLDER, id))
+    geode_functions.save(
+        variables_dict["geode_object"], data, UPLOAD_FOLDER, variables_dict["filename"]
+    )
+    geode_functions.save_viewable(
+        variables_dict["geode_object"], data, UPLOAD_FOLDER, variables_dict["id"]
+    )
 
     return flask.make_response({}, 200)
+
+
+@share_twin_routes.route("/coordinate_reference_system_exists", methods=["POST"])
+def coordinate_system_name_exists():
+    UPLOAD_FOLDER = flask.current_app.config["UPLOAD_FOLDER"]
+
+    array_variables = [
+        "geode_object",
+        "filename",
+        "coordinate_system_name",
+    ]
+
+    variables_dict = geode_functions.get_form_variables(
+        flask.request.form, array_variables
+    )
+
+    absolute_file_path = os.path.join(UPLOAD_FOLDER, variables_dict["filename"])
+    data = geode_functions.load(variables_dict["geode_object"], absolute_file_path)
+
+    coordinate_reference_system_exists = data.main_coordinate_reference_system_manager().coordinate_reference_system_exists(
+        variables_dict["coordinate_system_name"]
+    )
+
+    return flask.make_response(
+        {"coordinate_reference_system_exists": coordinate_reference_system_exists}, 200
+    )
 
 
 @share_twin_routes.route("/georeference", methods=["POST"])
